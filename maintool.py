@@ -344,6 +344,16 @@ def get_free_space_mb(dirname):
         ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(dirname), None, ctypes.pointer(total_bytes),
                                                    ctypes.pointer(free_bytes))
         return free_bytes.value, total_bytes.value
+    elif xbmc.getCondVisibility('system.platform.android'):
+        import subprocess
+        df = subprocess.Popen(['df', '/storage/emulated/legacy'], stdout=subprocess.PIPE)
+        output = df.communicate()[0]
+        info = output.split('\n')[1].split()
+        size = float(info[1].replace('G', '')) * 1000000000.0
+        size = size - (size % float(info[-1]))
+        available = float(info[3].replace('G', '')) * 1000000000.0
+        available = available - (available % float(info[-1]))
+        return int(round(available)), int(round(size))
     else:
         st = os.statvfs(dirname)
         return st.f_bavail * st.f_frsize, st.f_frsize * st.f_blocks
