@@ -77,7 +77,7 @@ def text_view(pathi='', data=''):
     if path and not data:
         if path == 'log':
             logfile_path = xbmc.translatePath('special://logpath')
-            logfile_names = ('kodi.log', 'spmc.log', 'tvmc.log', 'freetelly.log')
+            logfile_names = ('kodi.log', 'spmc.log', 'tvmc.log', 'freetelly.log', 'ftmc.log', 'firemc.log', 'nodi.log')
             for logfile_name in logfile_names:
                 log_file_path = os.path.join(logfile_path, logfile_name)
                 if os.path.isfile(log_file_path):
