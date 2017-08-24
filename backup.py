@@ -72,7 +72,7 @@ def get_keyboard(default="", heading="", hidden=False):
 def full_backup():
     exclude_dirs = ['backupdir', 'cache', 'temp']
     exclude_files = ["spmc.log", "spmc.old.log", "xbmc.log", "xbmc.old.log", "kodi.log", "kodi.old.log", "fretelly.log",
-                     "freetelly.old.log"]
+                     "freetelly.old.log", "ftmc.log", "ftmc.old.log", "firemc.log", "firemc.old.log", "nodi.log", "nodi.old.log"]
     message_header = "%s Is Creating A  Full  Backup..." % AddonTitle
     message1 = "Archiving..."
     message2 = ""
@@ -83,7 +83,7 @@ def full_backup():
 def no_data_backup():
     exclude_dirs = ['backupdir', 'cache', 'temp', 'Thumbnails', 'Databases']
     exclude_files = ["spmc.log", "spmc.old.log", "xbmc.log", "xbmc.old.log", "kodi.log", "kodi.old.log",
-                     "Textures13.db", "fretelly.log", "freetelly.old.log"]
+                     "Textures13.db", "fretelly.log", "freetelly.old.log", "ftmc.log", "ftmc.old.log", "firemc.log", "firemc.old.log", "nodi.log", "nodi.old.log"]
     message_header = "%s is creating the backup..." % AddonTitle
     message1 = "Archiving..."
     message2 = ""
@@ -94,7 +94,7 @@ def no_data_backup():
 def backup(type):
     exclude_dirs = ['backupdir', 'cache', 'temp', 'Thumbnails', 'Databases']
     exclude_files = ["spmc.log", "spmc.old.log", "xbmc.log", "xbmc.old.log", "kodi.log", "kodi.old.log", "freetelly.log",
-                     "freetelly.old.log"]
+                     "freetelly.old.log", "ftmc.log", "ftmc.old.log", "firemc.log", "firemc.old.log", "nodi.log", "nodi.old.log"]
     message_header = "%s Is Creating A Backup..." % AddonTitle
     message1 = "Archiving..."
     message2 = ""

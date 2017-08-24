@@ -344,6 +344,24 @@ def get_free_space_mb(dirname):
         ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(dirname), None, ctypes.pointer(total_bytes),
                                                    ctypes.pointer(free_bytes))
         return free_bytes.value, total_bytes.value
+    elif xbmc.getCondVisibility('system.platform.android'):
+        import subprocess
+        df = subprocess.Popen(['df', dirname], stdout=subprocess.PIPE)
+        output = df.communicate()[0]
+        info = output.split('\n')[1].split()
+        if 'G' in info[1]:
+            multiplier = 1000000000.0
+        elif 'M' in info[1]:
+            multiplier = 1000000.0
+        elif 'K' in info[1]:
+            multiplier = 1000.0
+        else:
+            multiplier = 1.0
+        size = float(info[1].replace('G', '').replace('M', '').replace('K', '')) * multiplier
+        size = size - (size % 4096.0)
+        available = float(info[3].replace('G', '').replace('M', '').replace('K', '')) * multiplier
+        available = available - (available % 4096.0)
+        return int(round(available)), int(round(size))
     else:
         st = os.statvfs(dirname)
         return st.f_bavail * st.f_frsize, st.f_frsize * st.f_blocks
