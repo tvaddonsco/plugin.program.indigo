@@ -81,8 +81,8 @@ imdb_id = None
 
 # ****************************************************************
 def MAININDEX():
-    kodi.addDir('GitHub Browser', '', 'github_main', artwork + 'github_browser.png',
-                description='Search for repositories hosted on GitHub.')
+    kodi.addItem("Git Browser", '', 'github_main', artwork + 'github_browser.png',
+                 description="Search for repositories hosted on GitHub.")
     kodi.addDir('Search by: Addon/Author', '', 'searchaddon', artwork + 'search.png',
                 description="Search for addons by Name or Author")
     if settings.getSetting('featured') == 'true':
@@ -166,124 +166,10 @@ def Get_search_results(title):
 viewsetter.set_view("sets")
 
 def github_main(url):
-    github_instructions()
-    kodi.addDir('Search by GitHub Username', 'username', 'github_search', artwork + 'search_by_username.png',
-                description="Search for addons by Username. Ex. tvaddonsco")
-    kodi.addDir('Search by GitHub Repository Title', 'repo', 'github_search', artwork + 'search_by_repository_title.png',
-                description="Search for addons by Repository Name")
-    kodi.addDir('Search GitHub by Addon ID', 'addon_id', 'github_search', artwork + 'searchaddonid.png',
-                description="Search for addons by AddonID. Ex. plugin.video.youtube (Advanced)")
-    #kodi.addItem('Update Addons', '', 'github_update', artwork + 'update_github.png',
-    #           description="Update GitHub Addons")
-    viewsetter.set_view("sets")
-
-def github_search(url):
-    q = _get_keyboard("", "Search GitHub")
-    if not q: return
-    import json
-    from libs.github_installer import github_api
-    if url == 'username':
-        rtype = 'api'
-        response = github_api.find_zips(q)
-        if response is None: return
-        for r in github_api.sort_results(response['items']):
-            if not r['path'].endswith(".zip"): continue
-            url = github_api.content_url % (r['repository']['full_name'], r['path'])
-            kodi.addItem(r['name'], json.dumps({"url": url, "user": q, "file": r['name'], "full_name": "%s/%s" % (q, r['repository']['name'])}), 'github_install', '', description="")
-        #viewsetter.set_view("list")
-        return
-    elif url == 'repo':
-        rtype = 'api'
-        results = github_api.search(q, 'title')
-        if results is None: return
-        for i in results['items']:
-            user = i['owner']['login']
-            response = github_api.find_zips(user)
-            if response is None: continue
-            for r in github_api.sort_results(response['items']):
-                if not r['path'].endswith(".zip"): continue
-                url = github_api.content_url % (r['repository']['full_name'], r['path'])
-                kodi.addItem(r['name'], json.dumps({"url": url, "user": q, "file": r['name'], "full_name": "%s/%s" % (q, r['repository']['name'])}), 'github_install', '', description="")
-        #viewsetter.set_view("list")
-        return
-            
-    elif url == 'addon_id':
-        rtype = 'web'
-        results = github_api.web_search(q)
+    if not xbmc.getCondVisibility('System.HasAddon(plugin.git.browser'):
+        xbmc.executebuiltin("XBMC.InstallAddon(plugin.git.browser)")
     else:
-        rtype = 'api'
-        results = github_api.search(q)
-    if results is None: return
-    for r in results['items']:
-        if rtype == 'api':
-            kodi.addDir(r['name'], json.dumps({"user":  r['owner']['login'], "repo": r['name'], "rtype": rtype}), 'github_results', '', description="")
-        else:
-            kodi.addItem("%s/%s" % (r['owner']['login'], r['name']), json.dumps({"user":  r['owner']['login'], "repo": r['name'], "rtype": rtype}), 'github_results', '', description="")
-    #viewsetter.set_view("list")
-
-def github_results(url):
-    import json
-    from libs import github_installer
-    from libs.github_installer import github_api
-    from libs.github_installer import kodi as _kodi
-    args = json.loads(url)
-    #viewsetter.set_view("list")
-    if args['rtype'] == 'web':
-        from libs.github_installer import kodi as _kodi
-        full_name = "%s/%s" % (args['user'], args['repo'])
-        c = _kodi.dialog_confirm("Confirm Install", full_name, yes="Install", no="Cancel")
-        if not c: return
-        url = "https://github.com/%s/%s/archive/master.zip" % (args['user'], args['repo'])
-        Ins = github_installer.GitHub_Installer(args['repo'], url, full_name, _kodi.vfs.join("special://home", "addons"), True)
-        return
-    results = github_api.find_zips(args['user'], args['repo'])
-    if results is None: return
-    for r in results['items']:
-        if r['repository']['name'] != args['repo']: continue
-        url = github_api.content_url % (r['repository']['full_name'], r['path'])
-        kodi.addItem(r['name'], json.dumps({'file': r['name'], "url": url, "full_name": r['repository']['full_name']}), 'github_install', '', description="")
-    #viewsetter.set_view("list")
-
-
-def github_install(url):
-    import re
-    import json
-    from libs.github_installer import kodi as _kodi
-    from libs import github_installer
-    from libs.github_installer import github_api
-    args = json.loads(url)
-    if 'file' in args:
-        #viewsetter.set_view("list")
-        c = _kodi.dialog_confirm("Confirm Install", args['file'])
-        if not c: return
-        addon_id = re.sub("-[\d\.]+zip$", "", args['file'])
-        github_installer.GitHub_Installer(addon_id, args['url'], args['full_name'], _kodi.vfs.join("special://home", "addons"))
-        if not dialog.yesno(siteTitle, '                     Click Continue to install more addons or',
-                            '                    Restart button to finalize addon installation',
-                            "                          Brought To You By %s " % siteTitle,
-                            nolabel='Restart', yeslabel='Continue'):
-            xbmc.executebuiltin('ShutDown')
-        #viewsetter.set_view("list")
-    else:
-        pass
-
-def github_instructions():
-    from libs.github_installer import kodi as _kodi
-    try:
-        KODI_LANGUAGE = xbmc.getLanguage()
-    except:
-        KODI_LANGUAGE = 'English'
-    path = _kodi.vfs.join(_kodi.get_path(), 'resources/language/%s/github_help.txt', KODI_LANGUAGE)
-    if not _kodi.vfs.exists(path):
-        path = _kodi.vfs.join(_kodi.get_path(), 'resources/language/English/github_help.txt')
-    text = _kodi.vfs.read_file(path)
-    _kodi.dialog_textbox('GitHub Browser Instructions', text)
-
-def github_update():
-    from libs import github_installer
-    from libs.github_installer import kodi as _kodi
-    c = _kodi.dialog_confirm("Confirm Update", "Search for updates?")
-    if c : github_installer.update_addons()
+        xbmc.executebuiltin("XBMC.Container.Update(plugin://plugin.git.browser)")
 
 # ********************************************************************
 def INTERNATIONAL():
