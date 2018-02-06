@@ -166,8 +166,11 @@ def Get_search_results(title):
 viewsetter.set_view("sets")
 
 def github_main(url):
-    if not xbmc.getCondVisibility('System.HasAddon(plugin.git.browser'):
-        xbmc.executebuiltin("XBMC.InstallAddon(plugin.git.browser)")
+    if not xbmc.getCondVisibility('System.HasAddon(plugin.git.browser)'):
+        if kodi.get_kversion() > 16:
+            xbmc.executebuiltin("XBMC.InstallAddon(plugin.git.browser)")
+        else:
+            xbmc.executebuiltin("XBMC.RunPlugin(plugin://plugin.git.browser)")
     else:
         xbmc.executebuiltin("XBMC.Container.Update(plugin://plugin.git.browser)")
 
