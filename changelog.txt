@@ -1,3 +1,6 @@
+V4.0.2
+- Fixed Jarvis Git Browser Installation
+
 V4.0.1
 - Standalone Git Browser
 
