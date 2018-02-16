@@ -17,6 +17,7 @@
 """
 import json
 import os
+import re
 import sys
 import urllib
 import urlparse
@@ -143,7 +144,7 @@ def addDir(name, url, mode, thumb, cover=None, fanart=fanart, meta_data=None, is
     return ok
 
 
-##NON CLICKABLE####
+# #NON CLICKABLE####
 
 def addItem(name, url, mode, iconimage, fanart=fanart, description=None):
     u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(
@@ -366,3 +367,9 @@ def execute_jsonrpc(command):
         command = json.dumps(command)
     response = xbmc.executeJSONRPC(command)
     return json.loads(response)
+
+
+def get_var(path, name):
+    with open(path, 'r') as content:
+        var = re.search(name + '''.+?(\w+|'[^']*'|"[^"]*")''', content.read()).group(1)
+    return var.replace("'", '').replace('"', '')

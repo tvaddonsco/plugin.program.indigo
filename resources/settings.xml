@@ -61,6 +61,7 @@
     <category label="Notifications">
         <setting type="bool" default="false" id="notifications-on-startup" label="Unsubscribe"/>
         <setting visible="false" id="hasran" type="bool" label="HasRan" default="false"/>
+        <setting visible="false" id="sevicehasran" type="bool" label="ServiceHasRan" default="false"/>
         <setting visible="false" id="set_rtmp" type="bool" label="Set_RTMP" default="false"/>
     </category>
 
