@@ -157,7 +157,6 @@ def tfalse(r, d=False):  ## Get True / False
 
 
 ## ################################################## ##
-## ################################################## ##
 ACTION_PREVIOUS_MENU = 10  ## ESC action
 ACTION_NAV_BACK = 92  ## Backspace action
 ACTION_MOVE_LEFT = 1  ## Left arrow key
@@ -372,8 +371,8 @@ def FetchNews():
 def CheckNews(TypeOfMessage, NewImage, NewMessage, DoFromService=True):
     if (len(NewImage) > 0) or (len(NewMessage) > 0):
         debob(
-            ["notifications-on-startup", tfalse(SettingG("notifications-on-startup")), "DoFromService", DoFromService])
-        if (tfalse(SettingG("notifications-on-startup")) == False) or (DoFromService == False):
+            ["notifications-on-startup", SettingG("notifications-on-startup"), "DoFromService", DoFromService])
+        if (SettingG("notifications-on-startup") == 'false') or (DoFromService == False):
             if NewImage.lower() == "none":
                 NewImage = ""
             if NewMessage.lower() == "none":

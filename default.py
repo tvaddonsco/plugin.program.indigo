@@ -72,20 +72,6 @@ def main_menu():
 
     if kodi.get_setting('hasran') == 'false':
         kodi.set_setting('hasran', 'true')
-
-    if kodi.get_setting('set_rtmp') == 'false':
-        try:
-            addon_able.set_enabled("inputstream.adaptive")
-        except:
-            pass
-        time.sleep(0.5)
-        try:
-            addon_able.set_enabled("inputstream.rtmp")
-        except:
-            pass
-        time.sleep(0.5)
-        xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
-        kodi.set_setting('set_rtmp', 'true')
         
     dp = xbmcgui.DialogProgress()
     try:
