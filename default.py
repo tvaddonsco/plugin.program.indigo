@@ -223,12 +223,14 @@ def system_info():
     versioni = xbmc_version[:4]
     VERSIONS = {10: 'Dharma', 11: 'Eden', 12: 'Frodo', 13: 'Gotham', 14: 'Helix', 15: 'Isengard', 16: 'Jarvis', 17: 'Krypton'}
     codename = VERSIONS.get(int(xbmc_version[:2]))
-    
-    f = urllib.urlopen("http://www.canyouseeme.org/")
-    html_doc = f.read()
-    f.close()
-    m = re.search('IP"\svalue="([^"]*)', html_doc)
- 
+    try:
+        f = urllib.urlopen("http://www.canyouseeme.org/")
+        html_doc = f.read()
+        f.close()
+        m = '[COLOR blue]%s[/COLOR]' % re.search('IP"\svalue="([^"]*)', html_doc).group(1)
+    except:
+        m = '[COLOR red]%s[/COLOR]' % 'IP Check Not Available'
+
     # Get Python Version
     pv = sys.version_info
     
@@ -237,7 +239,7 @@ def system_info():
     kodi.addItem('[COLOR ghostwhite]System Time: [/COLOR][COLOR lime]' + systime + '[/COLOR]', '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Gateway: [/COLOR][COLOR blue]' + gateway + '[/COLOR]', '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Local IP: [/COLOR][COLOR blue]' + ipaddy + '[/COLOR]', '', 100, artwork+'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]External IP: [/COLOR][COLOR blue]' + m.group(1) + '[/COLOR]', '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.addItem('[COLOR ghostwhite]External IP: [/COLOR]' + m, '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]DNS 1: [/COLOR][COLOR blue]' + dns1 + '[/COLOR]', '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Network: [/COLOR][COLOR gold]'+linkstate + '[/COLOR]', '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Disc Space: [/COLOR][COLOR gold]'+str(totalspace) + '[/COLOR]', '', 100, artwork + 'icon.png', "", description=" ")
