@@ -345,8 +345,10 @@ def get_free_space_mb(dirname):
                                                    ctypes.pointer(free_bytes))
         return free_bytes.value, total_bytes.value
     else:
-        st = os.statvfs(dirname)
-        return st.f_bavail * st.f_frsize, st.f_frsize * st.f_blocks
+        import subprocess
+        df = subprocess.Popen(['df', dirname], stdout=subprocess.PIPE)
+        output = df.communicate()[0].decode('utf-8').split('\n')[1].split()
+        return int(output[3]) * 1024, int(output[1]) * 1024
 
 
 def _is_debugging():
