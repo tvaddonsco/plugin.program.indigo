@@ -6,7 +6,8 @@ import urllib2
 import datetime
 from libs import kodi
 import xbmcaddon
-import common as Common
+# import common as Common
+import notification
 import base64
 
 import time
@@ -73,8 +74,7 @@ if kodi.get_var(run_once_path, 'hasran') == 'false':
 # Start of notifications
 if kodi.get_setting('sevicehasran') == 'true':
     TypeOfMessage = "t"
-    (NewImage, NewMessage) = Common.FetchNews()
-    Common.CheckNews(TypeOfMessage, NewImage, NewMessage, True)
+    notification.check_news2(TypeOfMessage, override_service=False)
 # ################################################## ##
 
 

@@ -65,13 +65,14 @@ def tool_menu():
         acw_desc = weekly_onoff + " weekly maintenance on Kodi launch!"
     if kodi.get_setting('scriptblock') == 'false':
         scb_onoff = 'Enable'
-        scb_mode = 'toggleblocker'
+        # scb_mode = 'toggleblocker'
         scb_art = 'enable_MSB.png'
     else:
         scb_onoff = 'Disable'
         scb_mode = 'toggleblocker'
         scb_art = 'enable_MSB.png'
     scb_desc = scb_onoff + " protection against malicious scripts!"
+
     if not _is_debugging():
         debug_onoff = 'Enable'
         debug_art = 'enabledebug.png'
@@ -335,10 +336,8 @@ def auto_clean(auto_clear=False):
 
 
 def get_free_space_mb(dirname):
-    import ctypes
-    # import platform
-    # if platform.system() == 'Windows':
     if xbmc.getCondVisibility('system.platform.windows'):
+        import ctypes
         free_bytes = ctypes.c_ulonglong(0)
         total_bytes = ctypes.c_int64()
         ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(dirname), None, ctypes.pointer(total_bytes),
