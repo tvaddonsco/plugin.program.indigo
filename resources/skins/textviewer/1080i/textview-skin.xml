@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window type="window" id="1100">
+    <defaultcontrol always="true">20212</defaultcontrol>
+    <zorder>2</zorder>
+    <menucontrol>9000</menucontrol>
+    <backgroundcolor>0xff000000</backgroundcolor>
+    <animation effect="fade" start="0,0" time="100">WindowOpen</animation>
+    <coordinates>
+        <left>0</left>
+        <top>0</top>
+    </coordinates>
+    <controls>
+        <control type="image" id="20100">
+            <description>background image</description>
+            <left>0</left>
+            <top>0</top>
+            <height>1080</height>
+            <width>1920</width>
+            <visible>true</visible>
+            <fadetime>200</fadetime>
+            <aspectratio>keep</aspectratio>
+        </control>
+
+        <control type="image" id="20101">
+            <description>Branding Logo</description>
+            <left>20</left>
+            <top>5</top>
+            <height>90</height>
+            <width>350</width>
+            <visible>true</visible>
+            <align>left</align>
+            <aligny>top</aligny>
+            <texture>tvalogo_coloredbackground2.png</texture>
+            <aspectratio>keep</aspectratio>
+        </control>
+
+        <control type="textbox" id="20301">
+            <description>addon title box</description>
+            <left>650</left>
+            <top>25</top>
+            <height>50</height>
+            <width>550</width>
+            <visible>true</visible>
+            <font>font20</font>content_box = self.getControl(self.content_box_control)
+            <align>center</align>
+            <aligny>top</aligny>
+            <!--<textcolor>ffE7AD00</textcolor>-->
+            <textcolor>ff00c0ff</textcolor>
+        </control>
+
+        <control type="label" id="20304">
+            <description>file name box</description>
+            <left>1200</left>
+            <top>25</top>
+            <height>45</height>
+            <width>650</width>
+            <visible>true</visible>
+            <font>font12</font>
+            <align>center</align>
+            <aligny>center</aligny>
+            <colordiffuse>FFFFFFFF</colordiffuse>
+            <textcolor>ff00c0ff</textcolor>
+            <scrollspeed>20</scrollspeed>
+            <scroll>true</scroll>
+        </control>
+
+        <control type="textbox" id="20302">
+            <description>main contents box</description>
+            <left>60</left>
+            <top>90</top>
+            <height>890</height>
+            <width>1750</width>
+            <visible>true</visible>
+            <font>font10</font>
+            <align>left</align>
+            <aligny>top</aligny>
+            <onup>20291</onup>
+            <ondown>20290</ondown>
+            <onleft>20293</onleft>
+            <onright>20212</onright>
+            <textcolor>FFD7F6DC</textcolor>
+            <showonepage>true</showonepage>
+            <pagecontrol>20212</pagecontrol>
+        </control>
+
+        <control type="scrollbar" id="20212">
+            <description>vertical scroll bar</description>
+            <left>1855</left>
+            <top>90</top>
+            <height>890</height>
+            <width>45</width>
+            <subtype>text</subtype>
+            <visible>true</visible>
+            <texturesliderbackground>scrollbar-V-background.png</texturesliderbackground>
+            <texturesliderbar>scrollbar-V.png</texturesliderbar>
+            <texturesliderbarfocus colordiffuse="FF000FFF">scrollbar-V-focus.png</texturesliderbarfocus>
+            <orientation>vertical</orientation>
+            <showonepage>false</showonepage>
+            <onup>20291</onup>
+            <ondown>20215</ondown>
+            <onleft>20215</onleft>
+            <onright>20215</onright>
+        </control>
+
+        <control type="group" id="20215">
+            <description>page scroll buttons group</description>
+            <defaultcontrol>20302</defaultcontrol>
+            <left>75r</left>
+            <top>1030</top>
+            <height>50</height>
+            <width>auto</width>
+            <visible>true</visible>
+            <onup>20212</onup>
+            <ondown>20291</ondown>
+            <onleft>20290</onleft>
+            <onright>20293</onright>
+
+            <control type="label" id="20201">
+                <description>list position</description>
+                <posx>60r</posx>
+                <posy>0</posy>
+                <width>500</width>
+                <height>30</height>
+                <!--<label>-</label>-->
+                <font>font10</font>
+                <align>right</align>
+                <textcolor>ffffffff</textcolor>
+            </control>
+
+            <control type="button" id="20216">
+                <description>Page Down button</description>
+                <left>50r</left>
+                <width>50</width>
+                <height>30</height>
+                <colordiffuse>FFFFFFFF</colordiffuse>
+                <texturefocus colordiffuse="FFFFAAFF">page-down-focus.png</texturefocus>
+                <texturenofocus colordiffuse="FFFFAAFF">page-down.png</texturenofocus>
+                <onleft>20290</onleft>
+                <onright>20217</onright>
+                <onup>20212</onup>
+                <ondown>20291</ondown>
+                <onclick>PageDown(20212)</onclick>
+            </control>
+
+            <control type="button" id="20217">
+                <description>Page Up button</description>
+                <left>0r</left>
+                <width>50</width>
+                <height>30</height>
+                <colordiffuse>FFFFFFFF</colordiffuse>
+                <texturefocus colordiffuse="FFFFAAFF">page-up-focus.png</texturefocus>
+                <texturenofocus colordiffuse="FFFFAAFF">page-up.png</texturenofocus>
+                <onleft>20216</onleft>
+                <onright>20293</onright>
+                <onup>20212</onup>
+                <ondown>20291</ondown>
+                <onclick>PageUp(20212)</onclick>
+            </control>
+
+        </control>
+        <control type="button" id="20291">
+            <description>exit button</description>
+            <left>65r</left>
+            <top>5</top>
+            <width>55</width>
+            <height>45</height>
+            <visible>true</visible>
+            <texturefocus>red squareclose buttons.png</texturefocus>
+            <texturenofocus colordiffuse="FFFFAAFF">red squareclose buttons.png</texturenofocus>
+            <onclick>close</onclick>
+            <onup>20215</onup>
+            <ondown>20212</ondown>
+            <onleft>20293</onleft>
+            <onright>20215</onright>
+            <aspectratio>keep</aspectratio>
+        </control>
+
+        <control type="button" id="20293">
+            <description>reload contents button</description>
+            <left>20</left>
+            <top>1010</top>
+            <width>60</width>
+            <height>55</height>
+            <visible>true</visible>
+            <colordiffuse>FFFFFFFF</colordiffuse>
+            <texturefocus>reload.png</texturefocus>
+            <texturenofocus colordiffuse="FFFFAAFF">reload.png</texturenofocus>
+            <onleft>20217</onleft>
+            <onright>20294</onright>
+            <onup>20291</onup>
+            <ondown>20291</ondown>
+        </control>
+
+        <control type="button" id="20294">
+            <description>old log button</description>
+            <left>200</left>
+            <top>1010</top>
+            <width>200</width>
+            <height>55</height>
+            <visible>true</visible>
+            <colordiffuse>FFFFFFFF</colordiffuse>
+            <texturefocus>Upload.png</texturefocus>
+            <texturenofocus colordiffuse="FFFFAAFF">Upload.png</texturenofocus>
+            <onleft>20293</onleft>
+            <onright>20295</onright>
+            <onup>20291</onup>
+            <ondown>20291</ondown>
+            <font>font13</font>
+            <textcolor>ff000000</textcolor>
+            <align>center</align>
+            <label>[B]Old Log[/B]</label>
+
+        </control>
+            <control type="button" id="20295">
+            <description>current log button</description>
+            <left>500</left>
+            <top>1010</top>
+            <width>200</width>
+            <height>55</height>
+            <visible>true</visible>
+            <colordiffuse>FFFFFFFF</colordiffuse>
+            <texturefocus>Upload.png</texturefocus>
+            <texturenofocus colordiffuse="FFFFAAFF">Upload.png</texturenofocus>
+            <onleft>20294</onleft>
+            <onright>20296</onright>
+            <onup>20291</onup>
+            <ondown>20291</ondown>
+            <font>font13</font>
+            <textcolor>ff000000</textcolor>
+            <align>center</align>
+            <label>[B]Current Log[/B]</label>
+        </control>
+
+        <control type="button" id="20296">
+            <description>Debug button</description>
+            <!--<left>1075</left>-->
+            <left>800</left>
+            <top>1010</top>
+            <width>200</width>
+            <height>55</height>
+            <visible>true</visible>
+            <colordiffuse>FFFFFFFF</colordiffuse>
+            <texturefocus>Upload.png</texturefocus>
+            <texturenofocus colordiffuse="FFFFAAFF">Upload.png</texturenofocus>
+            <onleft>20295</onleft>
+            <onright>20290</onright>
+            <onup>20291</onup>could not read the file
+            <ondown>20291</ondown>
+            <font>font13</font>
+            <textcolor>ff000000</textcolor>
+            <align>center</align>
+        </control>
+
+        <control type="button" id="20290">
+            <description>Log Uploader button</description>
+            <left>1100</left>
+            <top>1010</top>
+            <width>200</width>
+            <height>55</height>
+            <!--<colordiffuse>FFFFFFFF</colordiffuse>-->
+            <texturefocus colordiffuse="FFFFFFFF">Upload2.png</texturefocus>
+            <texturenofocus colordiffuse="FFFFAAFF">Upload.png</texturenofocus>
+            <texturenofocus>Upload1.png</texturenofocus>
+            <onleft>20296</onleft>
+            <onright>20297</onright>
+            <onup>20291</onup>
+            <ondown>20291</ondown>
+            <onclick>RunAddon(script.tvaddons.debug.log)</onclick>
+            <aspectratio>keep</aspectratio>
+            <align>center</align>
+            <textcolor>ff000000</textcolor>
+            <label>[B]Upload Log[/B]</label>
+        </control>
+
+        <control type="button" id="20297">
+            <description>kb button</description>
+            <left>1400</left>
+            <top>1010</top>
+            <width>200</width>
+            <height>55</height>
+            <visible>true</visible>
+            <colordiffuse>FFFFFFFF</colordiffuse>
+            <texturefocus>Upload.png</texturefocus>
+            <texturenofocus colordiffuse="FFFFAAFF">Upload.png</texturenofocus>
+            <onleft>20290</onleft>
+            <onright>20215</onright>
+            <onup>20291</onup>could not read the file
+            <ondown>20291</ondown>
+            <font>font13</font>
+            <textcolor>ff000000</textcolor>
+            <align>center</align>
+            <label>[B]KB input[/B]</label>
+        </control>
+
+     </controls>
+</window>

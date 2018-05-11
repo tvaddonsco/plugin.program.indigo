@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window type="dialog">
+	<allowoverlay>no</allowoverlay>
+	<defaultcontrol always="false">4001</defaultcontrol>
+	<coordinates>
+		<system>1</system>
+		<posx>0</posx>
+		<posy>0</posy>
+	</coordinates>
+
+    <controls>
+
+        <control type="image">
+            <posx>150</posx>
+            <posy>100</posy>
+            <width>1010</width>
+            <height>510</height>
+            <texture>note background.png</texture>
+        </control>
+
+
+        <control type="image" id="4100">
+            <posx>159</posx>
+            <posy>116</posy>
+            <width>246</width>
+            <height>95</height>
+            <texture>logo-background2.png</texture>
+            <!--<backgroundcolor>ffffffff</backgroundcolor>-->
+            <!--<aspectratio>keep</aspectratio>-->
+			<visible>true</visible>
+        </control>
+
+
+        <control type="image" id="4100">
+            <posx>160</posx>
+            <posy>120</posy>
+            <width>243</width>
+            <height>90</height>
+            <texture>tvaddons-retina.png</texture>
+            <!--<backgroundcolor>0xff000000</backgroundcolor>-->
+            <aspectratio>keep</aspectratio>
+			<visible>true</visible>
+        </control>
+		
+		<control type="textbox" id="20301">
+            <description>note header</description>
+            <posx>423</posx>
+            <posy>120</posy>
+            <width>706</width>Upload.png
+            <height>50</height>
+            <textcolor>ffffffff</textcolor>
+            <font>font13</font>
+			<align>center</align>
+            <aligny>top</aligny>
+			<!--<label>[B][COLOR lime]Unofficial Kodi Addon Community Updates[/COLOR][/B]</label>-->
+        </control>
+		
+		<control type="textbox" id="20302">
+            <description>notification</description>
+            <posx>423</posx>
+            <posy>150</posy>
+            <width>706</width>
+            <height>400</height>
+            <textcolor>ffffffff</textcolor>
+            <!--<textcolor>0xFF64d1ff</textcolor>-->
+            <font>font13</font>
+			<align>justify</align>
+            <aligny>top</aligny>
+            <wrapmultiline>true</wrapmultiline>
+			<autoscroll time="1600" delay="6000" repeat="6000">true</autoscroll>
+			<!--<label>We&apos;re giving away an [B][COLOR gold]Amazon Fire TV[/COLOR][/B] as part of a social media sharing contest and ask that you [COLOR gold]please participate[/COLOR]!-->
+                <!--&#x0A;We&apos;ve never charged anything for our service and really hope that you will take one minute to participate, because it will help us grow...-->
+                <!--&#x0A;Visit This Page: [B][COLOR blue]https://www.tvaddons.co/homecoming[/COLOR][/B]-->
+                <!--&#x0A;We have a lot of exciting new Kodi addons in the works, and invite you to visit our web site and forums regularly to get involved.-->
+                <!--&#x0A;&#x0A;Thank you!-->
+            <!--</label>-->
+        </control>
+
+        <!--<control type="label" id="4101">-->
+            <!--<posx>160</posx>-->
+            <!--<posy>100</posy>-->
+            <!--<width>240</width>-->
+            <!--<height>50</height>-->
+            <!--<align>center</align>-->
+            <!--<aligny>center</aligny>-->
+            <!--<font>font13</font>-->
+            <!--<textcolor>ffffffff</textcolor>-->
+        <!--</control>-->
+
+        <!--<control type="button" id="4000">&lt;!&ndash; Watch Stream &ndash;&gt;-->
+            <!--<posx>160</posx>-->
+            <!--<posy>228</posy>-->Upload.png
+            <!--<width>240</width>-->
+            <!--<height>50</height>-->
+            <!--<texturefocus>note-button-grey-focus.png</texturefocus>-->
+            <!--<texturenofocus>note-button-grey.png</texturenofocus>-->
+            <!--<onup>4005</onup>-->
+            <!--<ondown>4001</ondown>-->
+            <!--<align>center</align>-->
+            <!--<aligny>center</aligny>-->
+            <!--<font>font13</font>-->
+            <!--<textcolor>ffffffff</textcolor>-->
+            <!--<label>Button 1$ADDON[80000]</label>-->
+			<!--<visible>false</visible>-->
+        <!--</control>-->
+
+        <!--<control type="button" id="4001">&lt;!&ndash; Choose Stream &ndash;&gt;-->
+            <!--<posx>160</posx>-->
+            <!--<posy>280</posy>-->
+            <!--<width>240</width>-->
+            <!--<height>50</height>-->
+            <!--<texturefocus>note-button-grey-focus.png</texturefocus>-->
+            <!--<texturenofocus>note-button-grey.png</texturenofocus>-->
+            <!--<onup>4000</onup>-->
+            <!--<ondown>4002</ondown>-->
+            <!--<align>center</align>-->
+            <!--<aligny>center</aligny>-->
+            <!--<font>font13</font>-->
+            <!--<textcolor>ffffffff</textcolor>-->
+            <!--<label>$ADDON[script.ustvnow.plus.guide 30304]</label>-->
+			<!--<visible>false</visible>-->
+        <!--</control>-->
+
+        <!--<control type="label">&lt;!&ndash; Choose Stream Text &ndash;&gt;-->
+            <!--<posx>20</posx>-->
+            <!--<posy>260</posy>-->
+            <!--<width>240</width>-->
+            <!--<height>200</height>-->
+            <!--<font>font13</font>-->
+            <!--<textcolor>ffffffff</textcolor>-->
+            <!--<label>$ADDON[script.ustvnow.plus.guide 30305]</label>-->
+            <!--<wrapmultiline>true</wrapmultiline>-->
+			<!--<visible>false</visible>-->
+        <!--</control>-->
+
+        <!--<control type="label" id="4102">&lt;!&ndash; Show Title &ndash;&gt;-->
+            <!--<posx>20</posx>-->
+            <!--<posy>420</posy>-->
+            <!--<width>240</width>-->
+            <!--<height>50</height>-->
+            <!--<align>center</align>-->
+            <!--<aligny>center</aligny>-->
+            <!--<font>font13</font>-->
+            <!--<textcolor>ffffffff</textcolor>-->
+			<!--<visible>false</visible>-->
+        <!--</control>-->
+
+        <!--<control type="button" id="4005">&lt;!&ndash; watch from beginning &ndash;&gt;-->
+            <!--<posx>160</posx>-->
+            <!--<posy>178</posy>-->
+            <!--<width>240</width>-->
+            <!--<height>50</height>-->
+            <!--<texturefocus>note-button-grey-focus.png</texturefocus>-->
+            <!--<texturenofocus>note-button-grey.png</texturenofocus>-->
+            <!--<onup>8002</onup>-->
+            <!--<ondown>4000</ondown>-->
+            <!--<align>center</align>-->
+            <!--<aligny>center</aligny>-->
+            <!--<font>font13</font>-->
+            <!--<textcolor>ffffffff</textcolor>-->
+			<!--<visible>false</visible>-->
+        <!--</control>-->
+
+        <control type="button" id="4001">
+            <description>button 1</description>
+            <posx>160</posx>
+            <posy>228</posy>
+            <width>240</width>
+            <height>50</height>
+            <texturefocus>note-button-grey-focus.png</texturefocus>
+            <texturenofocus>note-button-grey.png</texturenofocus>
+            <onup>4007</onup>
+            <ondown>4002</ondown>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font13</font>
+            <textcolor>ffffffff</textcolor>
+            <!--<label>Button 1 $ADDON[80000]</label>-->
+            <label>Community Updates</label>
+            <!--<onclick>RunAddon(plugin.git.browser)</onclick>-->
+        </control>
+
+        <control type="button" id="4002">
+            <description>button 2</description>
+            <posx>160</posx>
+            <posy>278</posy>
+            <width>240</width>
+            <height>50</height>
+            <texturefocus>note-button-grey-focus.png</texturefocus>
+            <texturenofocus>note-button-grey.png</texturenofocus>
+            <onup>4001</onup>
+            <ondown>4003</ondown>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font13</font>
+            <textcolor>ffffffff</textcolor>
+            <!--<label>$ADDON[script.ustvnow.plus.guide 30307]</label>-->
+            <label>Need Support?</label>
+        </control>
+		
+        <control type="button" id="4003">
+            <description>button 3</description>
+            <posx>160</posx>
+            <posy>328</posy>
+            <width>240</width>
+            <height>50</height>
+            <texturefocus>note-button-grey-focus.png</texturefocus>
+            <texturenofocus>note-button-grey.png</texturenofocus>
+            <onup>4002</onup>
+            <ondown>4004</ondown>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font13</font>
+            <textcolor>ffffffff</textcolor>
+			<!--<label>$ADDON[script.ustvnow.plus.guide 80000]</label>-->
+			<label>Follow Us</label>
+        </control>
+
+        <control type="button" id="4004">
+            <description>button 4</description>
+            <posx>160</posx>
+            <posy>378</posy>
+            <width>240</width>
+            <height>50</height>
+            <texturefocus>note-button-grey-focus.png</texturefocus>
+            <texturenofocus>note-button-grey.png</texturenofocus>
+            <onup>4003</onup>
+            <ondown>4005</ondown>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font13</font>
+            <textcolor>ffffffff</textcolor>
+			<!--<label>Git Browser$ADDON[script.ustvnow.plus.guide 80001]</label>-->
+			<label>Git Browser</label>
+            <!--<onclick>RunAddon(plugin.git.browser)</onclick>-->
+            <visible>true</visible>
+        </control>
+		
+		<control type="button" id="4005">
+            <description>button 5</description>
+            <posx>160</posx>
+            <posy>428</posy>
+            <width>240</width>
+            <height>50</height>
+            <texturefocus>note-button-grey-focus.png</texturefocus>
+            <texturenofocus>note-button-grey.png</texturenofocus>
+            <onup>4004</onup>
+            <ondown>4006</ondown>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font13</font>
+            <textcolor>ffffffff</textcolor>
+			<label>Remind Me Later</label>
+			<visible>true</visible>
+        </control>
+
+        <control type="button" id="4006">
+            <description>button 6</description>
+            <posx>160</posx>
+            <posy>478</posy>
+            <width>240</width>
+            <height>50</height>
+            <texturefocus>note-button-grey-focus.png</texturefocus>
+            <texturenofocus>note-button-grey.png</texturenofocus>
+            <onup>4005</onup>
+            <ondown>4007</ondown>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font13</font>
+            <textcolor>ffffffff</textcolor>
+            <!--<label>$ADDON[script.ustvnow.plus.guide 30308]</label>-->
+            <label>Dismiss</label>
+            <visible>true</visible>
+        </control>
+
+		<control type="button" id="4007">
+            <description>button 7</description>
+            <posx>160</posx>
+            <posy>528</posy>
+            <width>240</width>
+            <height>50</height>
+            <texturefocus>note-button-grey-focus.png</texturefocus>
+            <texturenofocus>note-button-grey.png</texturenofocus>
+            <onup>4006</onup>
+            <ondown>4001</ondown>
+            <align>center</align>
+            <aligny>center</aligny>
+            <font>font13</font>
+            <textcolor>ffffffff</textcolor>
+            <!--<label>$ADDON[script.ustvnow.plus.guide 4005]</label>-->
+            <label>Button 7 $ADDON[4007]</label>
+			<visible>false</visible>
+        </control>
+
+		
+
+    </controls>
+</window>

@@ -42,7 +42,7 @@ iconart = xbmc.translatePath(os.path.join(mainPath, 'icon.png'))
 dp = xbmcgui.DialogProgress()
 dialog = xbmcgui.Dialog()
 # <<<<<<<<<Common Variables>>>>>>>>>>>>>>>
-Keymaps_URL = base64.b64decode("aHR0cDovL2luZGlnby50dmFkZG9ucy4va2V5bWFwcy9jdXN0b21rZXlzLnR4dA==")
+# Keymaps_URL = base64.b64decode("aHR0cDovL2luZGlnby50dmFkZG9ucy4va2V5bWFwcy9jdXN0b21rZXlzLnR4dA==")
 Keymaps_URL = 'http://indigo.tvaddons.co/keymaps/customkeys.txt'
 KEYBOARD_FILE = xbmc.translatePath(os.path.join('special://home/userdata/keymaps/', 'keyboard.xml'))
 openSub = "https://github.com/stsrfbim/facial-recog/raw/master/development/service.subtitles.opensubtitles_by_opensubtitles/service.subtitles.opensubtitles_by_opensubtitles-5.1.14.zip"
@@ -56,16 +56,23 @@ CMi = []
 
 # ****************************************************************
 def get_params():
-    param = [];
-    paramstring = sys.argv[2]
+    param = []
+    # dialog.ok('', str(sys.argv), str(addon))
+    # if sys.argv == ['']:
+    #     sys.argv = ['plugin://' + addon_id + '/', '2', '?content_type=video']
+    try:
+        paramstring = sys.argv[2]
+    except:
+        paramstring = '?content_type=video'
+    # paramstring = sys.argv[2]
     if len(paramstring) >= 2:
-        params = sys.argv[2];
+        params = paramstring  # sys.argv[2]
         cleanedparams = params.replace('?', '')
         if (params[len(params) - 1] == '/'): params = params[0:len(params) - 2]
-        pairsofparams = cleanedparams.split('&');
+        pairsofparams = cleanedparams.split('&')
         param = {}
         for i in range(len(pairsofparams)):
-            splitparams = {};
+            splitparams = {}
             splitparams = pairsofparams[i].split('=')
             if (len(splitparams)) == 2: param[splitparams[0]] = splitparams[1]
     return param
@@ -165,6 +172,7 @@ def Get_search_results(title):
                 pass
 viewsetter.set_view("sets")
 
+
 def github_main(url):
     if not xbmc.getCondVisibility('System.HasAddon(plugin.git.browser)'):
         if kodi.get_kversion() > 16:
@@ -179,7 +187,7 @@ def INTERNATIONAL():
     kodi.addDir('International Repos', '', 'interrepos',
                 'https://www.tvaddons.co/kodi-addons/images/categories/international.png',
                 description="Foreign language repos from across the globe!")
-    kodi.addDir('International Addonss', '', 'interaddons',
+    kodi.addDir('International Addons', '', 'interaddons',
                 'https://www.tvaddons.co/kodi-addons/images/categories/international.png',
                 description="Foreign language addons from across the globe!")
 
@@ -245,17 +253,6 @@ def INTERNATIONAL_ADDONS():
                       "th": "Thai",
                       "tr": "Turkish",
                       "vi": "Vietnamese"}
-            # for key in l_vert:
-            #     if e['languages'] == key:
-            #         full_name = l_vert[key]
-            #         name = e['languages']
-            #         try:
-            #             kodi.addDir(full_name, name, 'interaddonslist', imurl + full_name.lower() + '.png',
-            #                         description="Foreign language addons from across the globe!")
-            #         except:
-            #             pass
-            #         viewsetter.set_view("sets")
-
             for key in sorted(l_vert.items(), key=lambda key: key[1]):
                 try:
                     kodi.addDir(key[1], key[0], 'interaddonslist', imurl + key[1].lower() + '.png',
