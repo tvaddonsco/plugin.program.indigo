@@ -1,5 +1,9 @@
+V4.0.4.2
+- Improved Dependency Error Handling
+- Changed Address to Resolvers Repo
+
 V4.0.4.1
-- Reimplemented Requests Files due to IOS issues with the external Requests module.
+- Reimplemented internal Requests to fix iOS Crash
 
 V4.0.4
 - Notification Improvements
