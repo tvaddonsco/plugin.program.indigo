@@ -1,3 +1,6 @@
+V4.0.4.1
+- Reimplemented Requests Files due to IOS issues with the external Requests module.
+
 V4.0.4
 - Notification Improvements
 - Log Viewer improvements

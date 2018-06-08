@@ -9,13 +9,13 @@ import ssl
 import string
 import sys
 import time
-import traceback
 import urllib
 import urllib2
 import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
+import traceback
 from itertools import izip_longest
 
 from libs import addon_able
@@ -47,8 +47,7 @@ Keymaps_URL = 'http://indigo.tvaddons.co/keymaps/customkeys.txt'
 KEYBOARD_FILE = xbmc.translatePath(os.path.join('special://home/userdata/keymaps/', 'keyboard.xml'))
 openSub = "https://github.com/stsrfbim/facial-recog/raw/master/development/service.subtitles.opensubtitles_by_opensubtitles/service.subtitles.opensubtitles_by_opensubtitles-5.1.14.zip"
 burst_url = "http://burst.surge.sh/release/script.quasar.burst-0.5.8.zip"
-# tvpath = "https://oldgit.com/tvaresolvers/tva-common-repository/raw/master/zips/"
-tvpath = "https://github.com/zqfaen/tva-common/raw/master/zips/"
+tvpath = "https://github.com/tvaddonsco/tva-resolvers-repo/raw/master/zips"
 krypton_url = "http://mirrors.kodi.tv/addons/krypton/"
 api = aiapi
 CMi = []
@@ -427,12 +426,16 @@ def getaddoninfo(url, dataurl, repourl):
 
 
 def OPEN_URL(url):
-    req = urllib2.Request(url)
-    req.add_header('User-Agent',
-                   'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
-    response = urllib2.urlopen(req)
-    link = response.read()
-    response.close()
+    try:
+        req = urllib2.Request(url)
+        req.add_header('User-Agent',
+                       'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
+        response = urllib2.urlopen(req)
+        link = response.read()
+        response.close()
+    except:
+        link = ''
+        traceback.print_exc(file=sys.stdout)
     return link
 
 
@@ -795,6 +798,7 @@ def NEW_Depend(dataurl, script):
                         kodi.log("No local depend found = " + script + " Unfound URL is " + orglist)
         except:
             kodi.log("FAILED TO GET DEPENDS")
+            traceback.print_exc(file=sys.stdout)
 
 
 def GITHUBGET(script, dataurl):
@@ -856,8 +860,10 @@ def GITHUBGET(script, dataurl):
                         DEPENDINSTALL(script, orglist)
                 except:
                     kodi.log("Could not find required files ")
+                    traceback.print_exc(file=sys.stdout)
     except:
         kodi.log("Failed to find required files")
+        traceback.print_exc(file=sys.stdout)
 
 
 def DEPENDINSTALL(name, url):
