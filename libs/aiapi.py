@@ -1,4 +1,4 @@
-import requests
+from libs import requests
 
 
 XHR = {'X-Requested-With': 'XMLHttpRequest'}

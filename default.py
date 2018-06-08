@@ -20,7 +20,7 @@ import maintool
 import xbmc
 import xbmcgui
 import xbmcplugin
-import requests
+from libs import requests
 from libs import addon_able
 from libs import dom_parser
 from libs import kodi
