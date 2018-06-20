@@ -1,13 +1,17 @@
 # Config Wizard By: Blazetamer 2013-2016
 import os
 import re
-import urllib2
 
 import downloader
 import extract
 import xbmc
 import xbmcgui
 from libs import addon_able, kodi
+
+try:
+    from urllib.request import urlopen, Request  # python 3.x
+except ImportError:
+    from urllib2 import urlopen, Request  # python 2.x
 
 AddonTitle = kodi.addon.getAddonInfo('name')
 SiteDomain = 'TVADDONS.CO'
@@ -104,10 +108,10 @@ def JUVWIZARD():
 
 
 def OPEN_URL(url):
-    req = urllib2.Request(url)
+    req = Request(url)
     req.add_header('User-Agent',
                    'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
-    response = urllib2.urlopen(req)
+    response = urlopen(req)
     link = response.read()
     response.close()
     return link

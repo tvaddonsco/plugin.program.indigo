@@ -44,7 +44,6 @@
             <font>font20</font>content_box = self.getControl(self.content_box_control)
             <align>center</align>
             <aligny>top</aligny>
-            <!--<textcolor>ffE7AD00</textcolor>-->
             <textcolor>ff00c0ff</textcolor>
         </control>
 
@@ -121,7 +120,6 @@
                 <posy>0</posy>
                 <width>500</width>
                 <height>30</height>
-                <!--<label>-</label>-->
                 <font>font10</font>
                 <align>right</align>
                 <textcolor>ffffffff</textcolor>
@@ -135,7 +133,7 @@
                 <colordiffuse>FFFFFFFF</colordiffuse>
                 <texturefocus colordiffuse="FFFFAAFF">page-down-focus.png</texturefocus>
                 <texturenofocus colordiffuse="FFFFAAFF">page-down.png</texturenofocus>
-                <onleft>20290</onleft>
+                <onleft>20297</onleft>
                 <onright>20217</onright>
                 <onup>20212</onup>
                 <ondown>20291</ondown>
@@ -208,7 +206,6 @@
             <font>font13</font>
             <textcolor>ff000000</textcolor>
             <align>center</align>
-            <label>[B]Old Log[/B]</label>
 
         </control>
             <control type="button" id="20295">
@@ -228,12 +225,10 @@
             <font>font13</font>
             <textcolor>ff000000</textcolor>
             <align>center</align>
-            <label>[B]Current Log[/B]</label>
         </control>
 
         <control type="button" id="20296">
             <description>Debug button</description>
-            <!--<left>1075</left>-->
             <left>800</left>
             <top>1010</top>
             <width>200</width>
@@ -257,7 +252,6 @@
             <top>1010</top>
             <width>200</width>
             <height>55</height>
-            <!--<colordiffuse>FFFFFFFF</colordiffuse>-->
             <texturefocus colordiffuse="FFFFFFFF">Upload2.png</texturefocus>
             <texturenofocus colordiffuse="FFFFAAFF">Upload.png</texturenofocus>
             <texturenofocus>Upload1.png</texturenofocus>
@@ -265,11 +259,9 @@
             <onright>20297</onright>
             <onup>20291</onup>
             <ondown>20291</ondown>
-            <onclick>RunAddon(script.tvaddons.debug.log)</onclick>
             <aspectratio>keep</aspectratio>
             <align>center</align>
             <textcolor>ff000000</textcolor>
-            <label>[B]Upload Log[/B]</label>
         </control>
 
         <control type="button" id="20297">
@@ -289,7 +281,7 @@
             <font>font13</font>
             <textcolor>ff000000</textcolor>
             <align>center</align>
-            <label>[B]KB input[/B]</label>
+            <label>[B]KB Input[/B]</label>
         </control>
 
      </controls>

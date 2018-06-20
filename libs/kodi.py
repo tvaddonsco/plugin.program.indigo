@@ -371,5 +371,9 @@ def execute_jsonrpc(command):
 
 def get_var(path, name):
     with open(path, 'r') as content:
-        var = re.search(name + '''.+?(\w+|'[^']*'|"[^"]*")''', content.read()).group(1)
+        try:
+            var = re.search(name + '''.+?(\w+|'[^']*'|"[^"]*")''', content.read()).group(1)
+        except Exception as e:
+            xbmc.log('%s: Failed Variable Match: %s (%s)' % (addon_id, path, e), xbmc.LOGWARNING)
+            var = ''
     return var.replace("'", '').replace('"', '')

@@ -6,7 +6,6 @@ import re
 import shutil
 import sys
 import urllib
-# import urllib2
 
 import configwizard
 import textviewer
@@ -156,6 +155,8 @@ def main_menu():
                 description="Backup or restore your Kodi configuration in minutes!")
     kodi.addItem("Log Viewer", '', 'log_view', artwork + 'log_viewer.png',
                  description="Easily view your error log without leaving Kodi!")
+    kodi.addItem("No-Coin Scan", '', 'nocoin', artwork + 'no_coin.png',
+                 description="Scan your Kodi directory for coin mining.")
     kodi.addItem("Notifications " + note_status, '', 'toggle_notify', artwork + note_art,
                  description="%s to important TV ADDONS notifications on startup!" % note_description)
     kodi.addItem("Show Notification", '', 'show_note', artwork + 'notification.png',
@@ -461,14 +462,12 @@ elif mode == 'log_view':
 
 elif mode == 'show_note':
     import notification
-    # notification.note()
-
-    # import common as Common
     TypeOfMessage = "t"
     notification.check_news2(TypeOfMessage, override_service=True)
-    # (NewImage, NewMessage) = Common.FetchNews()
 
-    # Common.CheckNews(TypeOfMessage, NewImage, NewMessage, False)
+elif mode == 'nocoin':
+    import nocoin
+    nocoin.nocoin()
 
 # #####MAIN TOOL
 elif mode == 'call_maintool':

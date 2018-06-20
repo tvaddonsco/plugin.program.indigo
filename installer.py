@@ -1,6 +1,6 @@
 # TVADDONS.CO / TVADDONS.CO - Addon Installer - Module By: Blazetamer (2013-2016)
 
-import base64
+# import base64
 import downloader
 import extract
 import os
@@ -10,7 +10,6 @@ import string
 import sys
 import time
 import urllib
-import urllib2
 import xbmc
 import xbmcaddon
 import xbmcgui
@@ -22,6 +21,11 @@ from libs import addon_able
 from libs import aiapi
 from libs import kodi
 from libs import viewsetter
+
+try:
+    from urllib.request import urlopen, Request  # python 3.x
+except ImportError:
+    from urllib2 import urlopen, Request  # python 2.x
 
 if kodi.get_kversion() > 16.5:
     ssl._create_default_https_context = ssl._create_unverified_context
@@ -47,6 +51,7 @@ Keymaps_URL = 'http://indigo.tvaddons.co/keymaps/customkeys.txt'
 KEYBOARD_FILE = xbmc.translatePath(os.path.join('special://home/userdata/keymaps/', 'keyboard.xml'))
 openSub = "https://github.com/stsrfbim/facial-recog/raw/master/development/service.subtitles.opensubtitles_by_opensubtitles/service.subtitles.opensubtitles_by_opensubtitles-5.1.14.zip"
 burst_url = "http://burst.surge.sh/release/script.quasar.burst-0.5.8.zip"
+# tvpath = "https://oldgit.com/tvaresolvers/tva-common-repository/raw/master/zips/"
 tvpath = "https://github.com/tvaddonsco/tva-resolvers-repo/raw/master/zips"
 krypton_url = "http://mirrors.kodi.tv/addons/krypton/"
 api = aiapi
@@ -67,7 +72,8 @@ def get_params():
     if len(paramstring) >= 2:
         params = paramstring  # sys.argv[2]
         cleanedparams = params.replace('?', '')
-        if (params[len(params) - 1] == '/'): params = params[0:len(params) - 2]
+        if (params[len(params) - 1] == '/'):
+            params = params[0:len(params) - 2]
         pairsofparams = cleanedparams.split('&')
         param = {}
         for i in range(len(pairsofparams)):
@@ -169,6 +175,8 @@ def Get_search_results(title):
                            contextreplace=False)
             except:
                 pass
+
+
 viewsetter.set_view("sets")
 
 
@@ -228,7 +236,7 @@ def INTERNATIONAL_ADDONS():
                       "fr": "French",
                       "de": "German",
                       "el": "Greek",
-                      # "iw": "Hebrew",
+                      # "iw": "Hebrew",.execute
                       "he": "Hebrew",
                       "hu": "Hungarian",
                       "is": "Icelandic",
@@ -400,7 +408,7 @@ def List_Adult(url):
                                          "YES (ENTER)")
         if confirm:
             url = 'https://indigo.tvaddons.co/installer/sources/xxx.php'
-            link = OPEN_URL(url).replace('\r', '').replace('\n', '').replace('\t', '');
+            link = OPEN_URL(url).replace('\r', '').replace('\n', '').replace('\t', '')
             match = re.compile(
                 "'name' => '(.+?)'.+?dataUrl' => '(.+?)'.+?xmlUrl' => '(.+?)'.+?downloadUrl' => '(.+?)'").findall(link)
             for name, dataurl, url, repourl in match:
@@ -427,10 +435,10 @@ def getaddoninfo(url, dataurl, repourl):
 
 def OPEN_URL(url):
     try:
-        req = urllib2.Request(url)
+        req = Request(url)
         req.add_header('User-Agent',
                        'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
-        response = urllib2.urlopen(req)
+        response = urlopen(req)
         link = response.read()
         response.close()
     except:
@@ -490,7 +498,7 @@ def HUBINSTALL(name, url, script):
 
 def OPENSUBINSTALL(url):
     path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
-    dp = xbmcgui.DialogProgress();
+    dp = xbmcgui.DialogProgress()
     dp.create("Please Wait", " ", '', 'Installing Official OpenSubtitles Addon')
     lib = os.path.join(path, 'opensubtitlesOfficial.zip')
     try:
@@ -521,15 +529,15 @@ def set_content(content):
 
 # HELPDIR**************************************************************
 def addDir(name, url, mode, thumb):
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(name);
-    ok = True;
-    liz = xbmcgui.ListItem(name, iconImage=iconart, thumbnailImage=thumb);
+    u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(name)
+    ok = True
+    liz = xbmcgui.ListItem(name, iconImage=iconart, thumbnailImage=thumb)
     # liz.setInfo(type="Video",infoLabels={"title":name,"Plot":description})
     try:
         liz.setProperty("fanart_image", fanart)
     except:
         pass
-    ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True);
+    ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True)
     return ok
 
 
@@ -558,7 +566,7 @@ def add2HELPDir(name, url, mode, iconimage, fanart, description, filetype, conte
     u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(
         name) + "&iconimage=" + urllib.quote_plus(iconimage) + "&fanart=" + urllib.quote_plus(
         fanart) + "&description=" + urllib.quote_plus(description) + "&filetype=" + urllib.quote_plus(filetype)
-    ok = True;
+    ok = True
     liz = xbmcgui.ListItem(name, iconImage=iconart, thumbnailImage=iconimage)
     # if len(contextmenuitems) > 0:
     liz.addContextMenuItems(contextmenuitems, replaceItems=contextreplace)
