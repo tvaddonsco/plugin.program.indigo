@@ -67,7 +67,35 @@
 
     <category label="Auto-View">
         <setting id="auto-view" type="bool" label="[COLOR blue]Enable Autoview[/COLOR]" default="true"/>
+    </category>
 
+    <category label="NoCoin">
+        <setting type="lsep" label="Directory To Scan"/>
+        <setting id="scan_default_dir" type="bool" label="Kodi Home Directory" default="true" visible="true"/>
+        <setting id="default_dir" type="text" label="Kodi Home Directory" visible="false"
+                 default="xbmc.translatePath('special://home/')"/>
+        <setting id="scan_warning" type="bool" default="false" visible="true"
+                 label="[COLOR=red][B]CAUTION:[/B] Scanning directory paths outside of the Kodi Home Directoy may
+          cause false positives and can extend scan times. Use with caution[/COLOR]"/>
+        <setting id="scan_dir0" type="text" label="[COLOR=red]User Defined[/COLOR]" default="" visible="eq(-1,true)"/>
+        <setting id="scan_dir1" type="text" label="[COLOR=red]User Defined[/COLOR]" default="" visible="!eq(-1,) + eq(-2,true)"/>
+        <setting id="scan_dir2" type="text" label="[COLOR=red]User Defined[/COLOR]" default="" visible="!eq(-1,) + eq(-3,true)"/>
+        <setting id="scan_dir3" type="text" label="[COLOR=red]User Defined[/COLOR]" default="" visible="!eq(-1,) + eq(-4,true)"/>
+        <setting id="scan_dir4" type="text" label="[COLOR=red]User Defined[/COLOR]" default="" visible="!eq(-1,) + eq(-5,true)"/>
+        <setting id="scan_dir5" type="text" label="[COLOR=red]User Defined[/COLOR]" default="" visible="!eq(-1,) + eq(-6,true)"/>
+        <setting id="scan_dir6" type="text" label="[COLOR=red]User Defined[/COLOR]" default="" visible="!eq(-1,) + eq(-7,true)"/>
+
+        <setting type="lsep" label="Definition Location"/>
+        <setting id="default_url_t" type="bool" label="Default NoCoin Definitions" default="true" visible="true"/>
+        <!--<setting id="default_url" type="text" label="Default Location" visible="eq(-1,true)"-->
+        <setting id="default_url" type="text" label="Default Location" visible="false"
+                 default="https://raw.githubusercontent.com/keraf/NoCoin/master/src/blacklist.txt"/>
+        <setting id="user_url0" type="text" label="User Defined" default="" visible="true"/>
+        <setting id="user_url1" type="text" label="User Defined" default="" visible="!eq(-1,)"/>
+        <setting id="user_url2" type="text" label="User Defined" default="" visible="!eq(-1,)"/>
+        <setting id="user_url3" type="text" label="User Defined" default="" visible="!eq(-1,)"/>
+        <setting id="user_url4" type="text" label="User Defined" default="" visible="!eq(-1,)"/>
+        <setting id="user_url5" type="text" label="User Defined" default="" visible="!eq(-1,)"/>
     </category>
 
 </settings>

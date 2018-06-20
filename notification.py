@@ -101,7 +101,8 @@ class PopupNote(xbmcgui.WindowXMLDialog):
         elif control_id == self.support:
             title_box = self.getControl(self.title_box_control)
             title_box.setText("[B][COLOR lime]Need Assistance? We're Here![/COLOR][/B]")
-            contents = '\n\nPlease visit our discussion forums at [COLOR blue]www.tvaddons/forums[/COLOR] where someone is always eager to be of assistance.'
+            contents = '\n\nPlease visit our discussion forums at [COLOR blue]www.tvaddons/forums[/COLOR] where ' \
+                       'someone is always eager to be of assistance.'
             content_box = self.getControl(self.content_box_control)
             content_box.setText(contents)
 
@@ -118,7 +119,10 @@ class PopupNote(xbmcgui.WindowXMLDialog):
         elif control_id == self.git_browser:
             title_box = self.getControl(self.title_box_control)
             title_box.setText("[B][COLOR lime]Git Browser[/COLOR][/B]")
-            contents = '\n\nGit Browser is the new and improved method of installing unrestricted Kodi addons, regardless of whether we approve of them or not. Connect directly to the GitHub repositories of your favourite Kodi addon developers. Search for GitHub Usernames Kodi on Google if you have trouble figuring out which ones to look up.'
+            contents = '\n\nGit Browser is the new and improved method of installing unrestricted Kodi addons, ' \
+                       'regardless of whether we approve of them or not. Connect directly to the GitHub repositories ' \
+                       'of your favourite Kodi addon developers. Search for GitHub Usernames Kodi on Google if you ' \
+                       'have trouble figuring out which ones to look up.'
             content_box = self.getControl(self.content_box_control)
             content_box.setText(contents)
 

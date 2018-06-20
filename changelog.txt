@@ -1,3 +1,9 @@
+V4.0.5
+- Added No-Coin Crypto-Mining detection
+- Improved Log Viewer to support No-Coin reporting
+- Improvements to service.py and kodi.py for better Error Handling
+- Minor Code Cleanup to prepare for Python 3.x
+
 V4.0.4.2
 - Improved Dependency Error Handling
 - Changed Address to Resolvers Repo

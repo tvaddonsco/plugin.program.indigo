@@ -2,18 +2,20 @@ import xbmc
 import os
 import shutil
 import re
-import urllib2
 import datetime
 from libs import kodi
 import xbmcaddon
 # import common as Common
 import notification
-import base64
+# import base64
 
 import time
 from libs import addon_able
-import fileinput
-import sys
+
+try:
+    from urllib.request import urlopen, Request  # python 3.x
+except ImportError:
+    from urllib2 import urlopen, Request  # python 2.x
 
 addon_id = kodi.addon_id
 AddonTitle = kodi.addon.getAddonInfo('name')
@@ -34,7 +36,7 @@ for old_file in old_maintenance:
     if os.path.exists(old_file):
         try:
             shutil.rmtree(old_file)
-        except OSError:
+        except IOError:
             pass
 
 # #############################
@@ -46,7 +48,7 @@ if xbmc.getCondVisibility('System.HasAddon(script.service.twitter)'):
 
 # ################################################## ##
 date = datetime.datetime.today().weekday()
-if  (kodi.get_setting("clearday") == date) or kodi.get_setting("acstartup") == "true":
+if (kodi.get_setting("clearday") == date) or kodi.get_setting("acstartup") == "true":
     import maintool
     maintool.auto_clean(True)
 
@@ -54,13 +56,13 @@ if  (kodi.get_setting("clearday") == date) or kodi.get_setting("acstartup") == "
 if kodi.get_setting('set_rtmp') == 'false':
     try:
         addon_able.set_enabled("inputstream.adaptive")
-    except:
-        pass
+    except Exception as e:
+        kodi.log(e)
     time.sleep(0.5)
     try:
         addon_able.set_enabled("inputstream.rtmp")
-    except:
-        pass
+    except Exception as e:
+        kodi.log(e)
     time.sleep(0.5)
     # xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
     kodi.set_setting('set_rtmp', 'true')
@@ -68,9 +70,11 @@ if kodi.get_setting('set_rtmp') == 'false':
 
 # ################################################## ##
 run_once_path = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id, 'resources', 'run_once.py'))
-if kodi.get_var(run_once_path, 'hasran') == 'false':
+if not os.path.isfile(run_once_path) or not open(run_once_path, 'rb').read():
+    with open(run_once_path, 'wb') as path:
+        path.write("hasran = 'false'")
+if kodi.get_var(run_once_path, 'hasran') != 'true':
     kodi.set_setting('sevicehasran', 'false')
-
 # Start of notifications
 if kodi.get_setting('sevicehasran') == 'true':
     TypeOfMessage = "t"
@@ -88,16 +92,17 @@ if __name__ == '__main__':
             break
         if kodi.get_setting('scriptblock') == 'true':
             kodi.log('Checking for Malicious scripts')
-            BlocksUrl = base64.b64decode('aHR0cDovL2luZGlnby50dmFkZG9ucy5jby9ibG9ja2VyL2Jsb2NrZXIudHh0')
+            # BlocksUrl = base64.b64decode('aHR0cDovL2luZGlnby50dmFkZG9ucy5jby9ibG9ja2VyL2Jsb2NrZXIudHh0')
             BlocksUrl = 'http://indigo.tvaddons.co/blocker/blocker.txt'
-            req = urllib2.Request(BlocksUrl)
-            req.add_header('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
+            req = Request(BlocksUrl)
+            req.add_header('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) '
+                                         'AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
             try:
-                response = urllib2.urlopen(req)
+                response = urlopen(req)
                 link = response.read()
                 response.close()
-            except:
-                kodi.log('Could not perform blocked script. invalid URL')
+            except Exception as e:
+                kodi.log('Could not perform blocked script. invalid URL ' + str(e))
                 break
             #     continue
             link = link.replace('\n', '').replace('\r', '').replace('\a', '')
@@ -115,11 +120,10 @@ if __name__ == '__main__':
                             if root != addonpath:
                                 if blocked in root:
                                     shutil.rmtree(root)
-                    except:
+                    except IOError:
                         kodi.log('Could not find blocked script')
 
-for line in fileinput.input(run_once_path, inplace=1):
-    if "hasran" in line:
-        line = line.replace('false', 'true')
-    sys.stdout.write(line)
+if not os.path.isfile(run_once_path) or kodi.get_var(run_once_path, 'hasran') != 'true':
+    with open(run_once_path, 'wb') as path:
+        path.write("hasran = 'true'")
 kodi.set_setting('sevicehasran', 'true')
