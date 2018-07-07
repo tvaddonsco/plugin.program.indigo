@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # import base64
-import htmlentitydefs
 import os
 import re
 import shutil
@@ -25,6 +24,11 @@ from libs import dom_parser
 from libs import kodi
 from libs import speedtest
 from libs import viewsetter
+
+try:
+    import htmlentitydefs  # python 2.x
+except ImportError:
+    import html.entities as htmlentitydefs  # python 3.x
 
 addon_id = kodi.addon_id
 addon = (addon_id, sys.argv)
@@ -83,16 +87,16 @@ def main_menu():
             dp.update(0, 'Getting %s Ready........' % AddonTitle, 'Extracting %s Icons......' % AddonTitle)
             extract.all(icons_zip, addon_path, dp)
             dp.close()
-    except:
-        pass
+    except Exception as e:
+        kodi.log(str(e))
     # Check for old version of hubrepo and remove it
     try:
         if os.path.exists(hubpath):
             with open(hubpath, 'r') as content:
                 if 'AG' in content:
                     shutil.rmtree(hubpath)
-    except:
-        pass
+    except Exception as e:
+        kodi.log(str(e))
     # # Check for HUBRepo and install it
     try:
         if not os.path.exists(hubpath):
@@ -101,18 +105,19 @@ def main_menu():
             xbmc.executebuiltin("XBMC.InstallAddon(%s)" % 'repository.xbmchub')
             addon_able.set_enabled("repository.xbmchub")
             xbmc.executebuiltin("XBMC.UpdateAddonRepos()")
-    except:
-        pass
+    except Exception as e:
+        kodi.log(str(e))
     # Check for Log Uploader and install it
     try:
         if not os.path.exists(uploaderpath):
-            installer.HUBINSTALL('script.tvaddons.debug.log', 'http://github.com/tvaddonsco/tva-release-repo/raw/master'
-                                                              '/script.tvaddons.debug.log/', 'script.tvaddons.debug.log')
+            installer.HUBINSTALL('script.tvaddons.debug.log',
+                                 'http://github.com/tvaddonsco/tva-release-repo/raw/master'
+                                 '/script.tvaddons.debug.log/', 'script.tvaddons.debug.log')
             addon_able.set_enabled('script.tvaddons.debug.log')
             # xbmc.executebuiltin("InstallAddon(%s)" % 'script.tvaddons.debug.log')
             xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
-    except:
-        pass
+    except Exception as e:
+        kodi.log(str(e))
    
     # Check for old maintenance tools and remove them
     old_maintenance = (oldinstaller, oldnotify, oldmain, oldwiz, oldfresh)
@@ -186,11 +191,11 @@ def what_sports():
     for stuff in sections:
         match = re.compile('class="listings-program-link">(.+?)</span></h3>.+?class="listings-program-link">.+?listings'
                            '-program-airing-info">(.+?)</p><p.+?description">(.+?)</p>').findall(stuff)
-        for name, time, description in match:
+        for m_name, m_time, m_description in match:
             kodi.addItem('[COLOR gold][B]%s[/COLOR][/B][COLOR white] - %s[/COLOR]'
-                         % (name_cleaner(name), time), '', '', artwork+'icon.png',
+                         % (name_cleaner(m_name), m_time), '', '', artwork+'icon.png',
                          description='[COLOR gold][B]%s[/COLOR][/B][COLOR white] - %s[/COLOR]'
-                                     % (name_cleaner(name), time))
+                                     % (name_cleaner(m_name), m_time))
     # viewsetter.set_view("files")
 
 
@@ -198,15 +203,16 @@ def rtmp_lib():
     liblist = "http://indigo.tvaddons.co/librtmp/rtmplist.txt"
     try:
         link = OPEN_URL(liblist).replace('\n', '').replace('\r', '')
-    except:
+    except Exception as e:
+        kodi.log(str(e))
         kodi.addItem('[COLOR gold][B]This service is currently unavailable.[/COLOR][/B]', '', 100, '', '', '')
         return
     match = re.compile('name="(.+?)".+?rl="(.+?)".+?ersion="(.+?)"').findall(link)
     kodi.addItem('[COLOR gold][B]Files Will Be Donwloaded to the Kodi Home directory,'
                  'You Will Need To Manually Install From There.[/COLOR][/B]', '', 100, '', '', '')
     # kodi.addItem('[COLOR gold]---------------------------------------------------------[/COLOR]', '', 100, '',' ', '')
-    for name, url, description in match:
-        kodi.addDir(name, url, "lib_installer", artwork + 'icon.png')
+    for m_name, m_url, m_description in match:
+        kodi.addDir(m_name, m_url, "lib_installer", artwork + 'icon.png')
     viewsetter.set_view("sets")
 
 
@@ -244,19 +250,20 @@ def system_info():
     freespace = maintool.convert_size(freespace) + ' Free'
     totalspace = maintool.convert_size(totalspace) + ' Total'
     screenres = xbmc.getInfoLabel('system.screenresolution')
-    freemem = xbmc.getInfoLabel('System.FreeMemory')
-    
+    freemem = maintool.convert_size(int(re.match('(\d+)', xbmc.getInfoLabel('System.FreeMemory')).group(1)) * 10 ** 6)
+
     # FIND WHAT VERSION OF KODI IS RUNNING
     xbmc_version = xbmc.getInfoLabel("System.BuildVersion")
     versioni = xbmc_version[:4]
-    VERSIONS = {10: 'Dharma', 11: 'Eden', 12: 'Frodo', 13: 'Gotham',
-                14: 'Helix', 15: 'Isengard', 16: 'Jarvis', 17: 'Krypton'}
-    codename = VERSIONS.get(int(xbmc_version[:2]))
+    versions = {10: 'Dharma', 11: 'Eden', 12: 'Frodo', 13: 'Gotham', 14: 'Helix', 15: 'Isengard', 16: 'Jarvis',
+                17: 'Krypton', 18: 'Leia'}
+    codename = versions.get(int(xbmc_version[:2]))
 
     # Get External IP Address
     try:
         ext_ip = ("blue", requests.get('https://api.ipify.org').text)
-    except Exception:
+    except Exception as e:
+        kodi.log(str(e))
         ext_ip = ("red", "IP Check Not Available")
 
     # Get Python Version
@@ -277,10 +284,12 @@ def system_info():
                  '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Network: [/COLOR][COLOR gold] %s[/COLOR]' % linkstate,
                  '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % totalspace,
-                 '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % freespace,
-                 '', 100, artwork + 'icon.png', "", description=" ")
+    if str(totalspace) != '0 B Total':
+        kodi.addItem('[COLOR ghostwhite]Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % totalspace,
+                     '', 100, artwork + 'icon.png', "", description=" ")
+    if str(freespace) != '0 B Free':
+        kodi.addItem('[COLOR ghostwhite]Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % freespace,
+                     '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Free Memory: [/COLOR][COLOR gold] %s[/COLOR]' % freemem,
                  '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Resolution: [/COLOR][COLOR gold] %s[/COLOR]' % screenres,
@@ -296,13 +305,14 @@ def fullspeedtest():
     try:
         link = OPEN_URL(speed_test)
         match = re.findall('href="([^"]*)".+src="([^"]*)".+\n.+?(\d+\s[^b]*b)', link)
-        for url, iconimage, name in reversed(match):
-            iconimage = artwork + str(name).replace(' ', '').lower() + '.png'
-            if 'mb'in iconimage and not os.path.isfile(iconimage):
-                iconimage = iconimage.replace('mb', '')
-            kodi.addItem('[COLOR ghostwhite]' + name + '[/COLOR]', url, "runtest", iconimage,
+        for m_url, m_iconimage, m_name in reversed(match):
+            m_iconimage = artwork + str(m_name).replace(' ', '').lower() + '.png'
+            if 'mb'in m_iconimage and not os.path.isfile(m_iconimage):
+                m_iconimage = m_iconimage.replace('mb', '')
+            kodi.addItem('[COLOR ghostwhite]' + m_name + '[/COLOR]', m_url, "runtest", m_iconimage,
                          description='Test with a ' + name + ' file')
-    except:
+    except Exception as e:
+        kodi.log(str(e))
         kodi.addItem('[COLOR ghostwhite]Speed Test is unavailable[/COLOR]', '', "", artwork + 'speed_test.png',
                      description='')
     viewsetter.set_view("sets")
@@ -327,18 +337,18 @@ def cleanse_title(text):
             # character reference
             try:
                 if text[:3] == "&#x":
-                    return unichr(int(text[3:-1], 16))
+                    return chr(int(text[3:-1], 16))  # unichr(int(text[3:-1], 16))
                 else:
-                    return unichr(int(text[2:-1]))
+                    return chr(int(text[2:-1]))  # unichr(int(text[2:-1]))
             except ValueError:
                 pass
         else:
             # named entity
             try:
-                text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+                # text = unichr(htmlentitydefs.name2codepoint[text[1:-1]])
+                text = chr(htmlentitydefs.name2codepoint[text[1:-1]])
             except KeyError:
                 pass
-
         # replace nbsp with a space
         text = text.replace(u'\xa0', u' ')
         return text
@@ -346,9 +356,8 @@ def cleanse_title(text):
     if isinstance(text, str):
         try:
             text = text.decode('utf-8')
-        except:
-            pass
-
+        except Exception as e:
+            kodi.log(str(e))
     return re.sub("&#?\w+;", fixup, text.strip())
 
 
@@ -359,7 +368,8 @@ def OPEN_URL(url):
         r = requests.get(url, headers=headers)
         if r.status_code == requests.codes.ok:
             return r.text
-    except:
+    except Exception as e:
+        kodi.log(str(e))
         return ''
 
 
@@ -367,14 +377,14 @@ def get_params():
     param = []
     paramstring = sys.argv[2]
     if len(paramstring) >= 2:
-        params = sys.argv[2]
-        cleanedparams = params.replace('?', '')
-        if params[len(params)-1] == '/':
-            params = params[0:len(params)-2]
+        params_l = sys.argv[2]
+        cleanedparams = params_l.replace('?', '')
+        # if params_l[len(params_l)-1] == '/':
+        #     params_l = params_l[0:len(params_l)-2]
         pairsofparams = cleanedparams.split('&')
         param = {}
         for i in range(len(pairsofparams)):
-            splitparams = {}
+            # splitparams = {}
             splitparams = pairsofparams[i].split('=')
             if (len(splitparams)) == 2:
                 param[splitparams[0]] = splitparams[1]
@@ -390,6 +400,7 @@ thumb = None
 try:
     iconimage = urllib.unquote_plus(params["iconimage"])
 except:
+    # TypeError and KeyError
     pass
 try:
     thumb = urllib.unquote_plus(params["thumb"])
@@ -435,10 +446,10 @@ except:
 # ext = addon.queries.get('ext', '')
 
 if kodi.get_setting('debug') == "true":
-    print "Mode: "+str(mode)
-    print "URL: "+str(url)
-    print "Name: "+str(name)
-    print "Thumb: "+str(thumb)
+    print("Mode: "+str(mode))
+    print("URL: "+str(url))
+    print("Name: "+str(name))
+    print("Thumb: "+str(thumb))
 
 
 if mode is None:

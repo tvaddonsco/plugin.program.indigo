@@ -12,9 +12,9 @@ import zipfile
 from zipfile import ZipFile
 
 try:
-    from urllib.request import urlopen, Request  # python 3.x
+    import urllib2  # python 2.x
 except ImportError:
-    from urllib2 import urlopen, Request  # python 2.x
+    import urllib as urllib2  # python 3.x
 
 addon_id = xbmcaddon.Addon().getAddonInfo('id')
 profile_path = os.path.join(xbmc.translatePath('special://profile/'), 'addon_data/', addon_id)
@@ -110,10 +110,10 @@ def log(text='', error=''):
 
 
 def open_url(path):
-    req = Request(path)
+    req = urllib2.Request(path)
     req.add_header('User-Agent',
                    'Mozilla/5.0 (Windows U Windows NT 5.1 en-GB rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
-    return urlopen(req).read()
+    return urllib2.urlopen(req).read()
 
 
 def get_definitions():

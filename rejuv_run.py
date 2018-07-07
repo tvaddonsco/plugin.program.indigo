@@ -1,3 +1,4 @@
+
 # Config Wizard By: Blazetamer 2013-2016
 import os
 import re
@@ -23,7 +24,7 @@ cutslink = "http://indigo.tvaddons.co/wizard/shortcuts.txt"
 def JUVWIZARD():
     filetype = 'main'
     link = OPEN_URL(wizlink).replace('\n', '').replace('\r', '').replace('\a', '').strip()
-    path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
+    # path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
     url = link
     confirm = xbmcgui.Dialog().yesno("Please Confirm",
                                      "                Please confirm that you wish to automatically",
@@ -37,17 +38,17 @@ def JUVWIZARD():
         lib = os.path.join(path, 'rejuv.zip')
         try:
             os.remove(lib)
-        except:
+        except OSError:
             pass
         # ## ## ... ##
         # kodi.log(url)
         if str(url).endswith('[error]'):
-            print url
+            print(url)
             dialog = xbmcgui.Dialog()
             dialog.ok("Error!", url)
             return
         if '[error]' in url:
-            print url
+            print(url)
             dialog = xbmcgui.Dialog()
             dialog.ok("Error!", url)
             return
@@ -57,7 +58,7 @@ def JUVWIZARD():
         elif filetype == 'addon':
             addonfolder = xbmc.translatePath(os.path.join('special://home', 'addons'))
         else:
-            print {'filetype': filetype}
+            print({'filetype': filetype})
             dialog = xbmcgui.Dialog()
             dialog.ok("Error!", 'filetype: "%s"' % str(filetype))
             return
@@ -67,16 +68,16 @@ def JUVWIZARD():
         addon_able.setall_enable()
         try:
             addon_able.set_enabled("inputstream.adaptive")
-        except:
-            pass
+        except Exception as e:
+            kodi.log(str(e))
         xbmc.sleep(4000)
         try:
             addon_able.set_enabled("inputstream.rtmp")
-        except:
-            pass
+        except Exception as e:
+            kodi.log(str(e))
         try:
             os.remove(lib)
-        except:
+        except OSError:
             pass
         if filetype == 'main':
             link = OPEN_URL(cutslink)
@@ -93,13 +94,13 @@ def JUVWIZARD():
         addon_able.setall_enable()
         try:
             addon_able.set_enabled("inputstream.adaptive")
-        except:
-            pass
+        except Exception as e:
+            kodi.log(str(e))
         xbmc.sleep(4000)
         try:
             addon_able.set_enabled("inputstream.rtmp")
-        except:
-            pass
+        except Exception as e:
+            kodi.log(str(e))
         # kodi.set_setting("wizardran",'true')
 
         dialog = xbmcgui.Dialog()
@@ -110,7 +111,8 @@ def JUVWIZARD():
 def OPEN_URL(url):
     req = Request(url)
     req.add_header('User-Agent',
-                   'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
+                   'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, '
+                   'like Gecko) Version/4.0 Mobile Safari/534.30')
     response = urlopen(req)
     link = response.read()
     response.close()

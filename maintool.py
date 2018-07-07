@@ -44,7 +44,8 @@ def tool_menu():
         for path in paths:
             try:
                 paths[path] = ' - [COLOR blue]' + convert_size(get_size(path)) + '[/COLOR]'
-            except:
+            except Exception as e:
+                kodi.log(str(e))
                 paths[path] = ' - [COLOR red]Error reading thumbnails[/COLOR]'
     startup_clean = kodi.get_setting("acstartup")
     if startup_clean == "false":
@@ -69,7 +70,7 @@ def tool_menu():
         scb_art = 'enable_MSB.png'
     else:
         scb_onoff = 'Disable'
-        scb_mode = 'toggleblocker'
+        # scb_mode = 'toggleblocker'
         scb_art = 'enable_MSB.png'
     scb_desc = scb_onoff + " protection against malicious scripts!"
 
@@ -234,7 +235,8 @@ def wipe_addons():
             xbmcgui.Dialog().ok(AddonName, "Addons Wiped Successfully!",
                                 "Click OK to exit Kodi and then restart to complete.")
             xbmc.executebuiltin('ShutDown')
-        except:
+        except Exception as e:
+            kodi.log(str(e))
             xbmcgui.Dialog().ok(AddonName, "Error Wiping Addons please visit TVADDONS.CO forums")
 
 
@@ -274,11 +276,16 @@ def auto_weekly_clean_on_off():
             kodi.set_setting("clearday", datetime.datetime.today().weekday())
             kodi.openSettings(addon_id, id1=5, id2=3)
             available_space, total_space = get_free_space_mb(xbmc.translatePath('special://home'))
+            if str(available_space) == '0 B Free' and str(total_space) == '0 B Total':
+                xbmcgui.Dialog().ok('Auto Maintenance Error',
+                                    'Auto Maintenance encountered a problem and can not be run',
+                                    'Maintenace can still be done individually')
+                return
             mb_settings = (0, 25, 50, 75, 100)
             while True:
                 allotted_space = 0
                 for value in ('cachemb', 'thumbsmb', 'packagesmb'):
-                    allotted_space += mb_settings[int(kodi.get_setting(value))] * 10 ** 6
+                    allotted_space += mb_settings[int(kodi.get_setting(value))] * 10**6
                 if (allotted_space >= available_space) and not kodi.get_setting("automb"):
                     xbmcgui.Dialog().ok("Your settings sizes for Kodi to use are larger than the available drive space",
                                         'Please try lower settings, uninstall uneeded apps and addons,',
@@ -298,11 +305,16 @@ def auto_clean(auto_clear=False):
                                       'Do you wish to continue?', yeslabel='Yes', nolabel='No'):
             return
     available_space, total_space = get_free_space_mb(xbmc.translatePath('special://home'))
+    if str(available_space) == '0 B Free' and str(total_space) == '0 B Total':
+        if not auto_clear:
+            xbmcgui.Dialog().ok('Auto Maintenance Error', 'Auto Maintenance encountered a problem and was not ran',
+                                'Maintenace can still be done individually')
+        return
     mb_settings = (0, 25, 50, 75, 100)
     for value in ('cachemb', 'thumbsmb', 'packagesmb'):
-        available_space += mb_settings[int(kodi.get_setting(value))] * 10 ** 6
+        available_space += mb_settings[int(kodi.get_setting(value))] * 10**6
     automb = kodi.get_setting("automb")
-    cachemb = float((mb_settings[int(kodi.get_setting("cachemb"))]) * 10 ** 6)  # 35%
+    cachemb = float((mb_settings[int(kodi.get_setting("cachemb"))]) * 10**6)  # 35%
     for path in (cache_path, temp_path):
         if os.path.exists(path):
             try:
@@ -310,24 +322,24 @@ def auto_clean(auto_clear=False):
                         ((cachemb == 0 and kodi.get_setting("accache") == 'true')
                          or (cachemb != 0 and (get_size(cache_path) >= int(cachemb)))):
                     delete_cache(auto_clear=True)
-            except:
-                pass
-    thumbsmb = float((mb_settings[int(kodi.get_setting("thumbsmb"))]) * 10 ** 6)  # 35%
+            except Exception as e:
+                kodi.log(str(e))
+    thumbsmb = float((mb_settings[int(kodi.get_setting("thumbsmb"))]) * 10**6)  # 35%
     try:
         if (automb and (thumbsmb >= int(available_space) * .35)) or \
                 ((thumbsmb == 0 and kodi.get_setting("acthumbs") == 'true')
                  or (thumbsmb != 0 and (get_size(thumbnail_path) >= int(thumbsmb)))):
             delete_thumbnails(auto_clear=True)
-    except:
-        pass
-    packagesmb = float((mb_settings[int(kodi.get_setting("packagesmb"))]) * 10 ** 6)  # 10%
+    except Exception as e:
+        kodi.log(str(e))
+    packagesmb = float((mb_settings[int(kodi.get_setting("packagesmb"))]) * 10**6)  # 10%
     try:
         if (automb and (packagesmb >= int(available_space) * .10)) or \
                 ((packagesmb == 0 and kodi.get_setting("acpackages") == 'true')
                  or (packagesmb != 0 and (get_size(packages_path) >= int(packagesmb)))):
             delete_packages(auto_clear=True)
-    except:
-        pass
+    except Exception as e:
+        kodi.log(str(e))
     if kodi.get_setting("accrash") == 'true':
         delete_crash_logs(auto_clear=True)
     if not auto_clear:
@@ -336,18 +348,25 @@ def auto_clean(auto_clear=False):
 
 
 def get_free_space_mb(dirname):
-    if xbmc.getCondVisibility('system.platform.windows'):
-        import ctypes
-        free_bytes = ctypes.c_ulonglong(0)
-        total_bytes = ctypes.c_int64()
-        ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(dirname), None, ctypes.pointer(total_bytes),
-                                                   ctypes.pointer(free_bytes))
-        return free_bytes.value, total_bytes.value
-    else:
-        import subprocess
-        df = subprocess.Popen(['df', dirname], stdout=subprocess.PIPE)
-        output = df.communicate()[0].decode('utf-8').split('\n')[1].split()
-        return int(output[3]) * 1024, int(output[1]) * 1024
+    try:
+        if xbmc.getCondVisibility('system.platform.windows'):
+            import ctypes
+            free_bytes = ctypes.c_ulonglong(0)
+            total_bytes = ctypes.c_int64()
+            ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(dirname), None, ctypes.pointer(total_bytes),
+                                                       ctypes.pointer(free_bytes))
+            return free_bytes.value, total_bytes.value
+        else:
+            import subprocess
+            df = subprocess.Popen(['df', dirname], stdout=subprocess.PIPE)
+            output = df.communicate()[0].decode('utf-8').split('\n')[1].split()
+            return int(output[3]) * 1024, int(output[1]) * 1024
+    except Exception as e:
+        kodi.log(str(e))
+        import re
+        free_space = int(re.match('(\d+)', xbmc.getInfoLabel('System.FreeSpace')).group(1)) * 10**6
+        total_space = int(re.match('(\d+)', xbmc.getInfoLabel('System.TotalSpace')).group(1)) * 10**6
+        return free_space, total_space
 
 
 def _is_debugging():
@@ -391,8 +410,8 @@ def source_change():
                 return
             with open(new_source, "w") as fil:
                 fil.write(str(b))
-    except:
-        pass
+    except Exception as e:
+        kodi.log(str(e))
 
 
 def feed_change():
@@ -406,5 +425,5 @@ def feed_change():
                 return
             with open(new_feed, "w") as fil:
                 fil.write(str(b))
-    except:
-        pass
+    except Exception as e:
+        kodi.log(str(e))

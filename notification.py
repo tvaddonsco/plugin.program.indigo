@@ -4,9 +4,9 @@ import xbmcaddon
 import os
 
 try:
-    from urllib.request import urlopen, Request  # python 3.x
+    import urllib2  # python 2.x
 except ImportError:
-    from urllib2 import urlopen, Request  # python 2.x
+    import urllib as urllib2  # python 3.x
 
 Addon = xbmcaddon.Addon()
 addon_id = Addon.getAddonInfo('id')
@@ -77,9 +77,12 @@ class PopupNote(xbmcgui.WindowXMLDialog):
     def onClick(self, control_id):
         if control_id == self.git_browser:
             self.close()
-            xbmc.executebuiltin("RunAddon(plugin.git.browser)")
+            # xbmc.executebuiltin("RunAddon(plugin.git.browser)")
+            import installer
+            installer.github_main('')
+            control_id = self.remind_later
 
-        elif control_id == self.remind_later:
+        if control_id == self.remind_later:
             settings.setSetting("noteType", '')
             settings.setSetting("noteImage", '')
             settings.setSetting("noteMessage", '')
@@ -170,12 +173,12 @@ def addon_path(f, fe=''):
 
 def open_url(path):
     try:
-        req = Request(path)
+        req = urllib2.Request(path)
         req.add_header('User-Agent',
                        'Mozilla/5.0 (Windows U Windows NT 5.1 en-GB rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
-        contents = urlopen(req).read().encode('utf-8')
+        contents = urllib2.urlopen(req).read().encode('utf-8')
     except IOError:
-        contents = 'Our servers seem to be having some trouble.\nPlease try again later!'
+        contents = ''
     return contents
 
 
@@ -197,6 +200,11 @@ def check_news2(message_type, override_service=False):
                 html = open_url(info_location)
         except IOError:
             html = ''
+        if not html and override_service:
+            if override_service:
+                html = 'Our servers seem to be having some trouble.\nPlease try again later!'
+            else:
+                return
         new_image = html.split('|||')[0].strip() if '|||' in html else ''
         new_message = html.split('|||')[1].strip() if '|||' in html else html
         old_note_image = settings.getSetting("noteImage")

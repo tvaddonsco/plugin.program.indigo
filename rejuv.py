@@ -14,7 +14,7 @@ def startup_rejuv():
                                                "and reconfigure Kodi with the latest Config Wizard update!",
                                    "                This will result in the loss of all your current data!")
     if yes_pressed:
-        addonPath = AddonID.getAddonInfo('path')
+        addonPath = kodi.addon.getAddonInfo('path')  # addonPath = AddonID.getAddonInfo('path')
         addonPath = xbmc.translatePath(addonPath)
         xbmcPath = os.path.join(addonPath, "..", "..")
         xbmcPath = os.path.abspath(xbmcPath)
