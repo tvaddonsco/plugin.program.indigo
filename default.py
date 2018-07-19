@@ -250,8 +250,8 @@ def system_info():
     freespace = maintool.convert_size(freespace) + ' Free'
     totalspace = maintool.convert_size(totalspace) + ' Total'
     screenres = xbmc.getInfoLabel('system.screenresolution')
-    freemem = maintool.convert_size(int(re.match('(\d+)', xbmc.getInfoLabel('System.FreeMemory')).group(1)) * 10 ** 6)
-
+    freemem = xbmc.getInfoLabel('System.FreeMemory')
+    
     # FIND WHAT VERSION OF KODI IS RUNNING
     xbmc_version = xbmc.getInfoLabel("System.BuildVersion")
     versioni = xbmc_version[:4]

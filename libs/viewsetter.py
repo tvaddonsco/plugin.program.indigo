@@ -2,7 +2,6 @@
 # ---------------------------------------------------------------------------
 
 import sys
-import kodi
 import xbmc
 import xbmcaddon
 import xbmcplugin
@@ -20,7 +19,6 @@ OTHER = "other"
 SETS = "sets"
 
 # Suggested view codes for each type from different skins (initial list thanks to xbmcswift2 library)
-# 50 = List, 51 = Poster, 52 = Lists,53 = Shift, 54 = InfoWall  55 = Wide list, 500 = Wall,501= List, 502 = Fanart
 ALL_VIEW_CODES = {
     'list': {
         'skin.confluence': 50,  # List
@@ -29,6 +27,7 @@ ALL_VIEW_CODES = {
         'skin.quartz': 50,  # List
         'skin.re-touched': 50,  # List
         'skin.estuary': 50,
+        # 50 = List, 51 = Poster, 52 = Lists,53 = Shift, 54 = InfoWall  55 = Wide list, 500 = Wall,501= List, 502 = Fanart
     },
     'thumbnail': {
         'skin.confluence': 501,  # Thumbnail
@@ -37,6 +36,7 @@ ALL_VIEW_CODES = {
         'skin.quartz': 51,  # Big icons
         'skin.re-touched': 500,  # Thumbnail
         'skin.estuary': 500,
+        # 50 = List, 51 = Poster, 52 = Lists, 53 = Shift, 54 = InfoWall  55 = Wide list, 500 = Wall,501= List, 502 = Fanart
     },
     'movies': {
         'skin.confluence': 500,  # Thumbnail 515, # Media Info 3
@@ -45,6 +45,7 @@ ALL_VIEW_CODES = {
         'skin.quartz': 52,  # Media info
         'skin.re-touched': 500,  # Thumbnail
         'skin.estuary': 52,
+        # 50 = List, 51 = Poster,52 = Lists,53 = Shift, 54 = InfoWall  55 = Wide list, 500 = Wall,501= List, 502 = Fanart
     },
     'tvshows': {
         'skin.confluence': 500,  # Thumbnail 515, # Media Info 3
@@ -53,6 +54,7 @@ ALL_VIEW_CODES = {
         'skin.quartz': 52,  # Media info
         'skin.re-touched': 500,  # Thumbnail
         'skin.estuary': 54,
+        # 50 = List, 51 = Poster,52 = Lists, 53 = Shift, 54 = InfoWall  55 = Wide list, 500 = Wall,501= List, 502 = Fanart
     },
     'seasons': {
         'skin.confluence': 50,  # List
@@ -61,6 +63,7 @@ ALL_VIEW_CODES = {
         'skin.quartz': 52,  # Media info
         'skin.re-touched': 50,  # List
         'skin.estuary': 53,
+        # 50 = List, 51 = Poster,52 = Lists, 53 = Shift, 54 = InfoWall  55 = Wide list, 500 = Wall,501= List, 502 = Fanart
     },
     'episodes': {
         'skin.confluence': 500,  # Media Info
@@ -69,6 +72,7 @@ ALL_VIEW_CODES = {
         'skin.quartz': 52,  # Media info
         'skin.re-touched': 550,  # Wide
         'skin.estuary': 55.
+        # 50 = List, 51 = Poster,52 = Lists,53 = Shift,54 = InfoWall  55 = Wide list, 500 = Wall,501= List, 502 = Fanart
     },
     'sets': {
         'skin.confluence': 500,  # List
@@ -77,6 +81,7 @@ ALL_VIEW_CODES = {
         'skin.quartz': 50,  # List
         'skin.re-touched': 50,  # List
         'skin.estuary': 55,
+        # 50 = List, 51 = Poster,52 = Lists,53 = Shift,54 = InfoWall  55 = Wide list, 500 = Wall,501= List, 502 = Fanart
     },
 }
 
@@ -85,10 +90,7 @@ def set_view(view_mode, view_code=0):
     if get_setting('auto-view') == 'true':
 
         # Set the content for extended library views if needed
-        try:
-            xbmcplugin.setContent(int(sys.argv[1]), view_mode)
-        except IndexError:
-            return
+        xbmcplugin.setContent(int(sys.argv[1]), view_mode)
         if view_mode == MOVIES:
             xbmcplugin.setContent(int(sys.argv[1]), "movies")
         elif view_mode == TV_SHOWS:
@@ -112,12 +114,12 @@ def set_view(view_mode, view_code=0):
                 view_code = view_codes.get(skin_name)
                 # kodi.log(view_code)
                 xbmc.executebuiltin("Container.SetViewMode(" + str(view_code) + ")")
-            # kodi.log("Setting First view code "+str(view_code)+" for view mode "+str(view_mode)+"and skin "+skin_name)
+            # kodi.log("Setting First view code "+str(view_code)+" for view mode "+str(view_mode)+" and skin "+skin_name)
             else:
                 xbmc.executebuiltin("Container.SetViewMode(" + str(view_code) + ")")
             # kodi.log("Setting Second view code for view mode "+str(view_mode)+" and skin "+skin_name)
-        except Exception as e:
-            # kodi.log("Unable to find view code "+str(view_code)+" for view mode "+str(view_mode)+"and skin "+skin_name)
-            kodi.log(str(e))
+        except:
+            # kodi.log("Unable to find view code "+str(view_code)+" for view mode "+str(view_mode)+" and skin "+skin_name)
+            pass
         # else:
         # 	xbmc.executebuiltin("Container.SetViewMode(sets)")

@@ -4,9 +4,9 @@ import xbmcaddon
 import os
 
 try:
-    import urllib2  # python 2.x
+    from urllib.request import urlopen, Request  # python 3.x
 except ImportError:
-    import urllib as urllib2  # python 3.x
+    from urllib2 import urlopen, Request  # python 2.x
 
 Addon = xbmcaddon.Addon()
 addon_id = Addon.getAddonInfo('id')
@@ -77,12 +77,9 @@ class PopupNote(xbmcgui.WindowXMLDialog):
     def onClick(self, control_id):
         if control_id == self.git_browser:
             self.close()
-            # xbmc.executebuiltin("RunAddon(plugin.git.browser)")
-            import installer
-            installer.github_main('')
-            control_id = self.remind_later
+            xbmc.executebuiltin("RunAddon(plugin.git.browser)")
 
-        if control_id == self.remind_later:
+        elif control_id == self.remind_later:
             settings.setSetting("noteType", '')
             settings.setSetting("noteImage", '')
             settings.setSetting("noteMessage", '')
@@ -104,8 +101,7 @@ class PopupNote(xbmcgui.WindowXMLDialog):
         elif control_id == self.support:
             title_box = self.getControl(self.title_box_control)
             title_box.setText("[B][COLOR lime]Need Assistance? We're Here![/COLOR][/B]")
-            contents = '\n\nPlease visit our discussion forums at [COLOR blue]www.tvaddons/forums[/COLOR] where ' \
-                       'someone is always eager to be of assistance.'
+            contents = '\n\nPlease visit our discussion forums at [COLOR blue]www.tvaddons/forums[/COLOR] where someone is always eager to be of assistance.'
             content_box = self.getControl(self.content_box_control)
             content_box.setText(contents)
 
@@ -122,10 +118,7 @@ class PopupNote(xbmcgui.WindowXMLDialog):
         elif control_id == self.git_browser:
             title_box = self.getControl(self.title_box_control)
             title_box.setText("[B][COLOR lime]Git Browser[/COLOR][/B]")
-            contents = '\n\nGit Browser is the new and improved method of installing unrestricted Kodi addons, ' \
-                       'regardless of whether we approve of them or not. Connect directly to the GitHub repositories ' \
-                       'of your favourite Kodi addon developers. Search for GitHub Usernames Kodi on Google if you ' \
-                       'have trouble figuring out which ones to look up.'
+            contents = '\n\nGit Browser is the new and improved method of installing unrestricted Kodi addons, regardless of whether we approve of them or not. Connect directly to the GitHub repositories of your favourite Kodi addon developers. Search for GitHub Usernames Kodi on Google if you have trouble figuring out which ones to look up.'
             content_box = self.getControl(self.content_box_control)
             content_box.setText(contents)
 
@@ -173,12 +166,12 @@ def addon_path(f, fe=''):
 
 def open_url(path):
     try:
-        req = urllib2.Request(path)
+        req = Request(path)
         req.add_header('User-Agent',
                        'Mozilla/5.0 (Windows U Windows NT 5.1 en-GB rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
-        contents = urllib2.urlopen(req).read().encode('utf-8')
+        contents = urlopen(req).read().encode('utf-8')
     except IOError:
-        contents = ''
+        contents = 'Our servers seem to be having some trouble.\nPlease try again later!'
     return contents
 
 
@@ -200,11 +193,6 @@ def check_news2(message_type, override_service=False):
                 html = open_url(info_location)
         except IOError:
             html = ''
-        if not html and override_service:
-            if override_service:
-                html = 'Our servers seem to be having some trouble.\nPlease try again later!'
-            else:
-                return
         new_image = html.split('|||')[0].strip() if '|||' in html else ''
         new_message = html.split('|||')[1].strip() if '|||' in html else html
         old_note_image = settings.getSetting("noteImage")

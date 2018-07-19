@@ -351,22 +351,30 @@ def get_free_space_mb(dirname):
     try:
         if xbmc.getCondVisibility('system.platform.windows'):
             import ctypes
-            free_bytes = ctypes.c_ulonglong(0)
             total_bytes = ctypes.c_int64()
+            free_bytes = ctypes.c_ulonglong(0)
             ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(dirname), None, ctypes.pointer(total_bytes),
                                                        ctypes.pointer(free_bytes))
             return free_bytes.value, total_bytes.value
         else:
             import subprocess
             df = subprocess.Popen(['df', dirname], stdout=subprocess.PIPE)
-            output = df.communicate()[0].decode('utf-8').split('\n')[1].split()
-            return int(output[3]) * 1024, int(output[1]) * 1024
+            output = df.communicate()[0].encode('utf-8').split('\n')[1].split()
+            try:
+                return int(output[3]) * 1024, int(output[1]) * 1024
+            except Exception as e:
+                kodi.log(str(e))
+                return str(output[3]), str(output[1])
     except Exception as e:
         kodi.log(str(e))
         import re
-        free_space = int(re.match('(\d+)', xbmc.getInfoLabel('System.FreeSpace')).group(1)) * 10**6
-        total_space = int(re.match('(\d+)', xbmc.getInfoLabel('System.TotalSpace')).group(1)) * 10**6
-        return free_space, total_space
+        try:
+            free_space = int(re.match('(\d+)', xbmc.getInfoLabel('System.FreeSpace')).group(1)) * 10**6
+            total_space = int(re.match('(\d+)', xbmc.getInfoLabel('System.TotalSpace')).group(1)) * 10**6
+            return free_space, total_space
+        except Exception as e:
+            kodi.log(str(e))
+            return xbmc.getInfoLabel('System.FreeSpace'), xbmc.getInfoLabel('System.TotalSpace')
 
 
 def _is_debugging():
@@ -381,8 +389,10 @@ def _is_debugging():
 
 def convert_size(size):
     import math
-    if size == 0:
+    if size is 0 or size is 'Unavailable':
         return '0 B'
+    if not isinstance(size, int):
+        return size
     labels = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
     i = int(math.floor(math.log(size, 1000)))
     s = round(size/math.pow(1000, i), 2)

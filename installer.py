@@ -1032,6 +1032,7 @@ def download(url, dest, addonfolder, name):
     kodi.log(' DOWNLOADING FILE:' + name + '.zip')
     kodi.log('From: ' + url)
     dp = xbmcgui.DialogProgress()
+    dp.create("Downloading: " + name)
     dp.update(0, "Downloading: " + name, '', 'Please Wait')
     urllib.urlretrieve(url, dest, lambda nb, bs, fs, url=url: _pbhook(nb, bs, fs, url, dp))
     extract.all(dest, addonfolder, dp=None)

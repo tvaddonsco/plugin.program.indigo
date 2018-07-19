@@ -20,17 +20,13 @@ import os
 import re
 import sys
 import urllib
-import strings
+import urlparse
 
+import strings
 import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
-
-try:
-    import urlparse  # python 2.x
-except ImportError:
-    import urllib.parse as urlparse  # python 3.x
 
 addon = xbmcaddon.Addon()
 
@@ -71,9 +67,7 @@ def get_profile():
 
 def set_setting(id, value):
     # print "SETTING IS =" +value
-    # if not isinstance(value, basestring): value = str(value)
-    if not isinstance(value, str):
-        value = str(value)
+    if not isinstance(value, basestring): value = str(value)
     addon.setSetting(id, value)
 
 
@@ -127,7 +121,7 @@ def addDir(name, url, mode, thumb, cover=None, fanart=fanart, meta_data=None, is
         thumb = meta_data['cover_url']
         fanart = meta_data['backdrop_url']
     if ADDON.getSetting('debug') == "true":
-        print(u)
+        print u
     if menu_items is None: menu_items = []
 
     if is_folder is None:
@@ -369,7 +363,7 @@ def translate_path(path):
 
 
 def execute_jsonrpc(command):
-    if not isinstance(command, str):  # basestring):
+    if not isinstance(command, basestring):
         command = json.dumps(command)
     response = xbmc.executeJSONRPC(command)
     return json.loads(response)
@@ -377,9 +371,5 @@ def execute_jsonrpc(command):
 
 def get_var(path, name):
     with open(path, 'r') as content:
-        try:
-            var = re.search(name + '''.+?(\w+|'[^']*'|"[^"]*")''', content.read()).group(1)
-        except Exception as e:
-            xbmc.log('%s: Failed Variable Match: %s (%s)' % (addon_id, path, e), xbmc.LOGWARNING)
-            var = ''
+        var = re.search(name + '''.+?(\w+|'[^']*'|"[^"]*")''', content.read()).group(1)
     return var.replace("'", '').replace('"', '')
