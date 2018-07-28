@@ -18,12 +18,17 @@ import maintool
 import xbmc
 import xbmcgui
 import xbmcplugin
-from libs import requests
+# from libs import requests
 from libs import addon_able
 from libs import dom_parser
 from libs import kodi
 from libs import speedtest
 from libs import viewsetter
+
+try:
+    from urllib.request import urlopen, Request  # python 3.x
+except ImportError:
+    from urllib2 import urlopen, Request  # python 2.x
 
 try:
     import htmlentitydefs  # python 2.x
@@ -247,10 +252,10 @@ def system_info():
     ipaddy = xbmc.getInfoLabel('Network.IPAddress')
     linkstate = xbmc.getInfoLabel('Network.LinkState').replace("Link:", "")
     freespace, totalspace = maintool.get_free_space_mb(os.path.join(xbmc.translatePath('special://home')))
-    freespace = maintool.convert_size(freespace) + ' Free'
-    totalspace = maintool.convert_size(totalspace) + ' Total'
+    freespace = maintool.convert_size(freespace)
+    totalspace = maintool.convert_size(totalspace)
     screenres = xbmc.getInfoLabel('system.screenresolution')
-    freemem = xbmc.getInfoLabel('System.FreeMemory')
+    freemem = maintool.convert_size(maintool.revert_size(xbmc.getInfoLabel('System.FreeMemory')))
     
     # FIND WHAT VERSION OF KODI IS RUNNING
     xbmc_version = xbmc.getInfoLabel("System.BuildVersion")
@@ -261,10 +266,14 @@ def system_info():
 
     # Get External IP Address
     try:
-        ext_ip = ("blue", requests.get('https://api.ipify.org').text)
+        ext_ip = ("blue", OPEN_URL('https://api.ipify.org'))
     except Exception as e:
         kodi.log(str(e))
-        ext_ip = ("red", "IP Check Not Available")
+        try:
+            link = OPEN_URL('http://whatismyip.network/')
+            ext_ip = ("blue", re.search('>My IP Address[^=]*[^>]*>([^<]*)', link).group(1))
+        except:
+            ext_ip = ("red", "IP Check Not Available")
 
     # Get Python Version
     pv = sys.version_info
@@ -284,11 +293,11 @@ def system_info():
                  '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Network: [/COLOR][COLOR gold] %s[/COLOR]' % linkstate,
                  '', 100, artwork + 'icon.png', "", description=" ")
-    if str(totalspace) != '0 B Total':
-        kodi.addItem('[COLOR ghostwhite]Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % totalspace,
+    if str(totalspace) != '0 B':
+        kodi.addItem('[COLOR ghostwhite]Total Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % totalspace,
                      '', 100, artwork + 'icon.png', "", description=" ")
-    if str(freespace) != '0 B Free':
-        kodi.addItem('[COLOR ghostwhite]Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % freespace,
+    if str(freespace) != '0 B':
+        kodi.addItem('[COLOR ghostwhite]Free Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % freespace,
                      '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Free Memory: [/COLOR][COLOR gold] %s[/COLOR]' % freemem,
                  '', 100, artwork + 'icon.png', "", description=" ")
@@ -309,10 +318,13 @@ def fullspeedtest():
             m_iconimage = artwork + str(m_name).replace(' ', '').lower() + '.png'
             if 'mb'in m_iconimage and not os.path.isfile(m_iconimage):
                 m_iconimage = m_iconimage.replace('mb', '')
+
             kodi.addItem('[COLOR ghostwhite]' + m_name + '[/COLOR]', m_url, "runtest", m_iconimage,
-                         description='Test with a ' + name + ' file')
+                         description='Test with a ' + m_name + ' file')
     except Exception as e:
         kodi.log(str(e))
+        import traceback
+        traceback.print_exc(file=sys.stdout)
         kodi.addItem('[COLOR ghostwhite]Speed Test is unavailable[/COLOR]', '', "", artwork + 'speed_test.png',
                      description='')
     viewsetter.set_view("sets")
@@ -365,11 +377,17 @@ def OPEN_URL(url):
     headers = {'user-agent': 'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30'
                              '(KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'}
     try:
-        r = requests.get(url, headers=headers)
-        if r.status_code == requests.codes.ok:
-            return r.text
+        # r = requests.get(url, headers=headers)
+        # if r.status_code == requests.codes.ok:
+        #     return r.text
+        response = urlopen(Request(url, headers=headers))
+        link = response.read()
+        response.close()
+        return link
     except Exception as e:
         kodi.log(str(e))
+        import traceback
+        traceback.print_exc(file=sys.stdout)
         return ''
 
 

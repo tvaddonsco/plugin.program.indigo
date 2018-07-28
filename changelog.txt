@@ -1,3 +1,7 @@
+V4.0.8
+- Fixes for SSL error opening some web pages
+- Fixes for Auto Maintenance on platforms which don't report proper disk sizes
+
 V4.0.7
 - Fixed Addon Installer
 

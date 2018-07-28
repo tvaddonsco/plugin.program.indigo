@@ -2,7 +2,8 @@ import datetime
 import os
 import shutil
 import sys
-
+import re
+import traceback
 import xbmc
 import xbmcgui
 from libs import kodi
@@ -305,10 +306,20 @@ def auto_clean(auto_clear=False):
                                       'Do you wish to continue?', yeslabel='Yes', nolabel='No'):
             return
     available_space, total_space = get_free_space_mb(xbmc.translatePath('special://home'))
-    if str(available_space) == '0 B Free' and str(total_space) == '0 B Total':
+    err_default = (0, '0 B', '0M', '0 MB', '0 MB Free', '0 MB Total', '0M Free', '0M Total')
+    if str(available_space) in err_default or str(total_space) in err_default:
         if not auto_clear:
-            xbmcgui.Dialog().ok('Auto Maintenance Error', 'Auto Maintenance encountered a problem and was not ran',
-                                'Maintenace can still be done individually')
+            if xbmcgui.Dialog().yesno('Auto Maintenance Error',
+                                      'Auto Maintenance encountered a problem and was not ran',
+                                      'Maintenace can still be done now or individually',
+                                      'Would you like to just clear the cache, packages, and thumbnails',
+                                      yeslabel='Yes', nolabel='No'):
+                delete_cache(auto_clear=True)
+                delete_packages(auto_clear=True)
+                delete_thumbnails(auto_clear=True)
+                delete_crash_logs(auto_clear=True)
+                xbmc.executebuiltin("Container.Refresh")
+                xbmcgui.Dialog().ok(AddonName, 'Auto Maintenance has been run successfully')
         return
     mb_settings = (0, 25, 50, 75, 100)
     for value in ('cachemb', 'thumbsmb', 'packagesmb'):
@@ -342,6 +353,7 @@ def auto_clean(auto_clear=False):
         kodi.log(str(e))
     if kodi.get_setting("accrash") == 'true':
         delete_crash_logs(auto_clear=True)
+
     if not auto_clear:
         xbmc.executebuiltin("Container.Refresh")
         xbmcgui.Dialog().ok(AddonName, 'Auto Maintenance has been run successfully')
@@ -355,7 +367,8 @@ def get_free_space_mb(dirname):
             free_bytes = ctypes.c_ulonglong(0)
             ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(dirname), None, ctypes.pointer(total_bytes),
                                                        ctypes.pointer(free_bytes))
-            return free_bytes.value, total_bytes.value
+            if free_bytes.value != '0 MB Free':
+                return free_bytes.value, total_bytes.value
         else:
             import subprocess
             df = subprocess.Popen(['df', dirname], stdout=subprocess.PIPE)
@@ -364,17 +377,58 @@ def get_free_space_mb(dirname):
                 return int(output[3]) * 1024, int(output[1]) * 1024
             except Exception as e:
                 kodi.log(str(e))
-                return str(output[3]), str(output[1])
+                return revert_size(output[3]), revert_size(output[1])
     except Exception as e:
         kodi.log(str(e))
-        import re
+        traceback.print_exc(file=sys.stdout)
+    return get_kodi_size('System.FreeSpace'), get_kodi_size('System.TotalSpace')
+
+
+def get_kodi_size(sys_space):
+    try:
+        space = xbmc.getInfoLabel(sys_space)
         try:
-            free_space = int(re.match('(\d+)', xbmc.getInfoLabel('System.FreeSpace')).group(1)) * 10**6
-            total_space = int(re.match('(\d+)', xbmc.getInfoLabel('System.TotalSpace')).group(1)) * 10**6
-            return free_space, total_space
+            space = revert_size(space)
         except Exception as e:
             kodi.log(str(e))
-            return xbmc.getInfoLabel('System.FreeSpace'), xbmc.getInfoLabel('System.TotalSpace')
+            traceback.print_exc(file=sys.stdout)
+    except Exception as e:
+        kodi.log(str(e))
+        traceback.print_exc(file=sys.stdout)
+        space = 0
+    return space
+
+
+def revert_size(size):
+    for size, multi in re.findall('(\d+\.?\d+?) ?([A-z])', size):
+        label = {"": 0, "B": 0, "K": 3, "M": 6, "G": 9, "T": 12, "P": 15, "E": 18, "Z": 21, "Y": 24}
+        for key in label:
+            if key.lower() == multi.lower():
+                size = int(float(size) * 10**label[key])
+    return size
+
+
+def convert_size(size):
+    err_defaults = (0, 'Unavailable', 'None', '0B', '0M', '0 MB Free', '0 MB Total', '0M Free', '0M Total')
+    if size in err_defaults:
+        return '0 B'
+    import math
+    labels = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    try:
+        i = int(math.floor(math.log(int(size), 1000)))
+    except Exception as e:
+        kodi.log(str(e))
+        i = int(0)
+    s = round(int(size) / math.pow(1000, i), 2)
+    return '%s %s' % (str(s), labels[i])
+
+
+def get_size(start_path):
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(start_path):
+        for f in filenames:
+            total_size += os.path.getsize(os.path.join(dirpath, f))
+    return total_size
 
 
 def _is_debugging():
@@ -385,26 +439,6 @@ def _is_debugging():
         if item['id'] == 'debug.showloginfo':
             return item['value']
     return False
-
-
-def convert_size(size):
-    import math
-    if size is 0 or size is 'Unavailable':
-        return '0 B'
-    if not isinstance(size, int):
-        return size
-    labels = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    i = int(math.floor(math.log(size, 1000)))
-    s = round(size/math.pow(1000, i), 2)
-    return '%s %s' % (s, labels[i])
-
-
-def get_size(start_path):
-    total_size = 0
-    for dirpath, dirnames, filenames in os.walk(start_path):
-        for f in filenames:
-            total_size += os.path.getsize(os.path.join(dirpath, f))
-    return total_size
 
 
 def source_change():
