@@ -10,11 +10,12 @@ import xbmcaddon
 import tarfile
 import zipfile
 from zipfile import ZipFile
+from libs import kodi
 
-try:
-    from urllib.request import urlopen, Request  # python 3.x
-except ImportError:
-    from urllib2 import urlopen, Request  # python 2.x
+# try:
+#     from urllib.request import urlopen, Request  # python 3.x
+# except ImportError:
+#     from urllib2 import urlopen, Request  # python 2.x
 
 addon_id = xbmcaddon.Addon().getAddonInfo('id')
 profile_path = os.path.join(xbmc.translatePath('special://profile/'), 'addon_data/', addon_id)
@@ -124,11 +125,11 @@ def log(text='', error=''):
             logfile.write(' ' + '\n')
 
 
-def open_url(path):
-    req = Request(path)
-    req.add_header('User-Agent',
-                   'Mozilla/5.0 (Windows U Windows NT 5.1 en-GB rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
-    return urlopen(req).read()
+# def open_url(path):
+#     req = Request(path)
+#     req.add_header('User-Agent',
+#                    'Mozilla/5.0 (Windows U Windows NT 5.1 en-GB rv:1.9.0.3) Gecko/2008092417 Firefox/3.0.3')
+#     return urlopen(req).read().decode('utf-8')
 
 
 def get_definitions():
@@ -143,7 +144,8 @@ def get_definitions():
     for def_list in default_defs:
         log('    ' + def_list)
         try:
-            definitons = open_url(def_list) if 'http' in def_list else str(open(def_list, 'rb'))
+            # definitons = open_url(def_list) if 'http' in def_list else str(open(def_list, 'rb'))
+            definitons = kodi.read_file(def_list) if 'http' in def_list else str(open(def_list, 'rb'))
             for line in definitons.splitlines():
                 if line and not line.startswith('#'):
                     for pattern in ('[^\/]*\/\/([^$]*)', '\s([^$]*)', '([\d+\.]+)\s'):

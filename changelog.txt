@@ -1,3 +1,11 @@
+V4.0.9
+- Fixes for Notification and Installer, Git Browser called to open directly after install
+- Moved all UrlOpen calls to Kodi.py - Read_page function
+- Fixed Sports listing guide
+- Fixes to Rejuvinate, Wipe Addons, and other little things
+- Code cleanup and compression
+- Prepare code for cross compatability with Python-2.7 and Python-3
+
 V4.0.8
 - Fixes for SSL error opening some web pages
 - Fixes for Auto Maintenance on platforms which don't report proper disk sizes

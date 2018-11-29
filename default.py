@@ -20,15 +20,9 @@ import xbmcgui
 import xbmcplugin
 # from libs import requests
 from libs import addon_able
-from libs import dom_parser
 from libs import kodi
 from libs import speedtest
 from libs import viewsetter
-
-try:
-    from urllib.request import urlopen, Request  # python 3.x
-except ImportError:
-    from urllib2 import urlopen, Request  # python 2.x
 
 try:
     import htmlentitydefs  # python 2.x
@@ -88,7 +82,8 @@ def main_menu():
             dp.create(AddonTitle, 'Getting ' + AddonTitle + ' Ready......', 'Downloading ' + AddonTitle + ' Icons.....')
             dp.update(0)
             icons_zip = os.path.join(packagepath, AddonTitle + '_icons.zip')
-            downloader.download(OPEN_URL('http://indigo.tvaddons.co/graphics/arts.txt'), icons_zip, dp)
+            downloader.download(kodi.read_file('http://indigo.tvaddons.co/graphics/arts.txt'), icons_zip, dp)
+            # downloader.download(OPEN_URL('http://indigo.tvaddons.co/graphics/arts.txt'), icons_zip, dp)
             dp.update(0, 'Getting %s Ready........' % AddonTitle, 'Extracting %s Icons......' % AddonTitle)
             extract.all(icons_zip, addon_path, dp)
             dp.close()
@@ -179,35 +174,37 @@ def do_log_uploader():
 
 
 def what_sports():
-    link = OPEN_URL('http://www.wheresthematch.com/tv/home.asp').replace('\r', '').replace('\n', '').replace('\t', '')
-    match = re.compile('href="http://www.wheresthematch.com/fixtures/(.+?).asp.+?class="">(.+?)</em> <em class="">v</'
-                       'em> <em class="">(.+?)</em>.+?time-channel ">(.+?)</span>').findall(link)
-    for game, name1, name2, gametime in match:
-        kodi.addItem('[COLOR gold][B]%s[/COLOR][/B][COLOR white] - %s vs %s - %s[/COLOR]'
-                     % (game, name1, name2, gametime), '', '', artwork+'icon.png',
-                     description='[COLOR gold][B]%s[/COLOR][/B][COLOR white] - %s vs %s - %s[/COLOR]'
-                                 % (game, name1, name2, gametime))
-        xbmc.executebuiltin("Container.SetViewMode(55)")
-
     # #######  AMERICAN  ###############
-    link = OPEN_URL('http://www.tvguide.com/sports/live-today/').replace('\r', '').replace('\n', '').replace('\t', '')
-    sections = dom_parser.parse_dom(link, 'div', {'class': "listings-program-content"})
-    # listings = dom_parser.parse_dom(sections, 'span', {'class': "listings-program-link"})
-    for stuff in sections:
-        match = re.compile('class="listings-program-link">(.+?)</span></h3>.+?class="listings-program-link">.+?listings'
-                           '-program-airing-info">(.+?)</p><p.+?description">(.+?)</p>').findall(stuff)
-        for m_name, m_time, m_description in match:
-            kodi.addItem('[COLOR gold][B]%s[/COLOR][/B][COLOR white] - %s[/COLOR]'
-                         % (name_cleaner(m_name), m_time), '', '', artwork+'icon.png',
-                         description='[COLOR gold][B]%s[/COLOR][/B][COLOR white] - %s[/COLOR]'
-                                     % (name_cleaner(m_name), m_time))
-    # viewsetter.set_view("files")
+    kodi.addItem('[COLOR blue][B]US Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
+                 description='[COLOR gold]Sports from around the US[/COLOR]')
+    link = kodi.read_file('https://www.tvguide.com/sports/live-today/')
+    match = re.findall('(?s)program-link">([^<]*)<.+?info">([^\|]*) \| ([^<]*)<.+?description">([^<]*)', link)
+    for m_name, m_time, m_channel, m_description in match:
+        kodi.addItem('[COLOR white][B]%s[/COLOR][/B] - [COLOR gold]%s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
+                     % (m_time.lower(), name_cleaner(m_name), m_channel), '', '', artwork + 'icon.png',
+                     description='[COLOR gold][B]%s - %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
+                                 % (m_description, name_cleaner(m_name), m_time.lower(), m_channel))
+    # #######  UK  ###############
+    kodi.addItem('[COLOR blue][B]UK Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
+                 description='[COLOR gold]Sports from around the UK[/COLOR]')
+    link = kodi.read_file('http://www.wheresthematch.com/tv/home.asp').replace('\r', '').replace('\n', '').replace('\t', '')
+    pattern ='(?s)class="fixture">.+?href="http:\/\/[^\/]*\/([^\/]*)\/[^\.]*.asp">[^>]*>([^<]+)<.+?asp.+?">([^<]*)<' \
+             '.+?WHEN:<\/strong>([^&]*&).+?\/strong>([^<]*)'
+    match = re.findall(pattern, link)
+    for game, name1, name2, gametime, channel in match:
+        gametime = re.search('at([^&]*)', gametime).group(1).replace('&', '').replace(' ', '')
+        kodi.addItem('[COLOR white][B]%s[/COLOR][/B][COLOR gold] - %s - %s vs %s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
+                     % (gametime, game, name1, name2, channel), '', '', artwork+'icon.png',
+                     description='[COLOR gold][B]%s - %s vs %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
+                                 % (game, name1, name2, gametime, channel))
+    viewsetter.set_view("tvshows")
 
 
 def rtmp_lib():
     liblist = "http://indigo.tvaddons.co/librtmp/rtmplist.txt"
     try:
-        link = OPEN_URL(liblist).replace('\n', '').replace('\r', '')
+        # link = OPEN_URL(liblist).replace('\n', '').replace('\r', '')
+        link = kodi.read_file(liblist).replace('\n', '').replace('\r', '')
     except Exception as e:
         kodi.log(str(e))
         kodi.addItem('[COLOR gold][B]This service is currently unavailable.[/COLOR][/B]', '', 100, '', '', '')
@@ -260,17 +257,20 @@ def system_info():
     # FIND WHAT VERSION OF KODI IS RUNNING
     xbmc_version = xbmc.getInfoLabel("System.BuildVersion")
     versioni = xbmc_version[:4]
-    versions = {10: 'Dharma', 11: 'Eden', 12: 'Frodo', 13: 'Gotham', 14: 'Helix', 15: 'Isengard', 16: 'Jarvis',
-                17: 'Krypton', 18: 'Leia'}
-    codename = versions.get(int(xbmc_version[:2]))
+    # versions = {10: 'Dharma', 11: 'Eden', 12: 'Frodo', 13: 'Gotham', 14: 'Helix', 15: 'Isengard', 16: 'Jarvis',
+    #             17: 'Krypton', 18: 'Leia'}
+    # codename = versions.get(int(xbmc_version[:2]))
+    codename = kodi.get_codename()
 
     # Get External IP Address
     try:
-        ext_ip = ("blue", OPEN_URL('https://api.ipify.org'))
+        # ext_ip = ("blue", OPEN_URL('https://api.ipify.org'))
+        ext_ip = ("blue", kodi.read_file('https://api.ipify.org'))
     except Exception as e:
         kodi.log(str(e))
         try:
-            link = OPEN_URL('http://whatismyip.network/')
+            # link = OPEN_URL('http://whatismyip.network/')
+            link = kodi.read_file('http://whatismyip.network/')
             ext_ip = ("blue", re.search('>My IP Address[^=]*[^>]*>([^<]*)', link).group(1))
         except:
             ext_ip = ("red", "IP Check Not Available")
@@ -312,7 +312,8 @@ def fullspeedtest():
     # speed_test = base64.b64decode("aHR0cDovL2luZGlnby50dmFkZG9ucy5hZy9zcGVlZHRlc3Qvc3BlZWR0ZXN0ZmlsZS50eHQ=")
     speed_test = 'http://www.engineerhammad.com/2015/04/Download-Test-Files.html'
     try:
-        link = OPEN_URL(speed_test)
+        # link = OPEN_URL(speed_test)
+        link = kodi.read_file(speed_test)
         match = re.findall('href="([^"]*)".+src="([^"]*)".+\n.+?(\d+\s[^b]*b)', link)
         for m_url, m_iconimage, m_name in reversed(match):
             m_iconimage = artwork + str(m_name).replace(' ', '').lower() + '.png'
@@ -373,22 +374,22 @@ def cleanse_title(text):
     return re.sub("&#?\w+;", fixup, text.strip())
 
 
-def OPEN_URL(url):
-    headers = {'user-agent': 'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30'
-                             '(KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'}
-    try:
-        # r = requests.get(url, headers=headers)
-        # if r.status_code == requests.codes.ok:
-        #     return r.text
-        response = urlopen(Request(url, headers=headers))
-        link = response.read()
-        response.close()
-        return link
-    except Exception as e:
-        kodi.log(str(e))
-        import traceback
-        traceback.print_exc(file=sys.stdout)
-        return ''
+# def OPEN_URL(url):
+#     headers = {'user-agent': 'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30'
+#                              '(KHTML, like Gecko) Version/4.0 Mobile Safari/534.30'}
+#     try:
+#         # r = requests.get(url, headers=headers)
+#         # if r.status_code == requests.codes.ok:
+#         #     return r.text
+#         response = urlopen(Request(url, headers=headers))
+#         link = response.read()
+#         response.close()
+#         return link
+#     except Exception as e:
+#         kodi.log(str(e))
+#         import traceback
+#         traceback.print_exc(file=sys.stdout)
+#         return ''
 
 
 def get_params():
@@ -637,7 +638,7 @@ elif mode == 'github_main':
 #
 # elif mode == 'github_results':
 #     installer.github_results(url)
-#
+#Update(plugin://plugin.git.browser)
 # elif mode == 'github_install':
 #     installer.github_install(url)
 #

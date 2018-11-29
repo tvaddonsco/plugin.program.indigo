@@ -11,7 +11,12 @@ from .connectionpool import (
     connection_from_url
 )
 
-from . import exceptions
+# from . import exceptions
+try:
+    from . import exceptions  # python 2.7
+except ImportError:
+    import builtins as exceptions  # python 3
+
 from .filepost import encode_multipart_formdata
 from .poolmanager import PoolManager, ProxyManager, proxy_from_url
 from .response import HTTPResponse

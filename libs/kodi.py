@@ -20,13 +20,24 @@ import os
 import re
 import sys
 import urllib
-import urlparse
+import traceback
+# import urlparse
 
 import strings
 import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
+
+try:
+    from urllib.request import urlopen, Request  # python 3.x
+except ImportError:
+    from urllib2 import urlopen, Request  # python 2.x
+
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 
 addon = xbmcaddon.Addon()
 
@@ -67,7 +78,8 @@ def get_profile():
 
 def set_setting(id, value):
     # print "SETTING IS =" +value
-    if not isinstance(value, basestring): value = str(value)
+    # if not isinstance(value, basestring): value = str(value)
+    if not isinstance(value, str): value = str(value)
     addon.setSetting(id, value)
 
 
@@ -121,7 +133,7 @@ def addDir(name, url, mode, thumb, cover=None, fanart=fanart, meta_data=None, is
         thumb = meta_data['cover_url']
         fanart = meta_data['backdrop_url']
     if ADDON.getSetting('debug') == "true":
-        print u
+        print(u)
     if menu_items is None: menu_items = []
 
     if is_folder is None:
@@ -349,6 +361,12 @@ def get_kversion():
     # 	log('LOWER THAN 16.5')
     return intbase
 
+def get_codename():
+    xbmc_version = xbmc.getInfoLabel("System.BuildVersion")
+    versions = {10: 'Dharma', 11: 'Eden', 12: 'Frodo', 13: 'Gotham', 14: 'Helix', 15: 'Isengard', 16: 'Jarvis',
+                17: 'Krypton', 18: 'Leia'}
+    return versions.get(int(xbmc_version[:2]))
+
 
 def i18n(string_id):
     try:
@@ -358,12 +376,68 @@ def i18n(string_id):
         return string_id
 
 
+def open_url(url, link=''):
+    user_agent = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/42.0.2311.135 Safari/537.36 Edge/12.246',
+                  'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.75 '
+                  'Safari/537.1',
+                  'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 '
+                  'Safari/537.36',
+                  'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1')
+    try:
+        import random
+        req = Request(url)
+        req.add_header('User-Agent', random.choice(user_agent))
+        response = urlopen(req)
+        link = response.read().decode('utf-8')
+        response.close()
+    except Exception as e:
+        log(str(e))
+        traceback.print_exc(file=sys.stdout)
+        # raise
+    return link
+
+
+def read_file(path, contents='', params=None, headers={}, verify_ssl=False, timeout = 10):
+    try:
+        if path.startswith('http'):  # Internet File or Page
+            if 'User-Agent' not in headers or 'user-agent' not in headers:
+                import random
+                header = ({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, '
+                                          'like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246'},
+                           {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) '
+                                          'Chrome/21.0.1180.75 Safari/537.1'},
+                           {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) '
+                                          'Chrome/41.0.2228.0 Safari/537.36'},
+                           {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1'})
+                headers.update(random.choice(header))
+            response = urlopen(Request(path, headers=headers))
+            # import requests
+            # ## verify = True does not work on all https websites
+            # r = requests.get(path, params=params, headers=headers, verify=verify_ssl, allow_redirects=True,
+            #                  timeout=timeout)
+            # if r.status_code == requests.codes.ok:
+            #     return r.text
+        elif os.path.isfile(path):  # Local File
+            response = open(path, 'rb')
+        else:
+            return contents
+        contents = response.read().decode('utf-8')
+        response.close()
+    except Exception as e:
+        print(str(e))
+        traceback.print_exc(file=sys.stdout)
+        # raise
+    return contents
+
+
 def translate_path(path):
     return xbmc.translatePath(path).decode('utf-8')
 
 
 def execute_jsonrpc(command):
-    if not isinstance(command, basestring):
+    # if not isinstance(command, basestring):
+    if not isinstance(command, str):
         command = json.dumps(command)
     response = xbmc.executeJSONRPC(command)
     return json.loads(response)

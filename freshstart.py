@@ -1,5 +1,6 @@
 import os
 import shutil
+import re
 
 import xbmc
 from libs import kodi
@@ -9,10 +10,9 @@ AddonTitle = kodi.addon.getAddonInfo('name')
 
 
 def startup_freshstart():
-    yes_pressed = kodi.yesnoDialog("Please confirm that you wish to factory restore your configuration.",
-                                   "                This will result in the loss of all your current data!",
-                                   ' ', AddonTitle, nolabel='No', yeslabel='Yes')
-    if yes_pressed:
+    if kodi.yesnoDialog("Please confirm that you wish to factory restore your configuration.",
+                        "                This will result in the loss of all your current data!",
+                        ' ', AddonTitle, nolabel='No', yeslabel='Yes'):
         home_path = xbmc.translatePath(os.path.join('special://home'))
         enableBG16 = "UseCustomBackground,false"
         enableBG17 = "use_custom_bg,false"
@@ -37,8 +37,10 @@ def startup_freshstart():
                             % AddonTitle, '', nolabel='No', yeslabel='Yes'):
             sub_dir_exclude.extend([AddonID])
         # Files to ignore and not to be removed
-        file_exclude = ('Addons26.db', 'kodi.log', 'Textures13.db', 'commoncache.db, Addons27.db')
-        if 0==0:  # try:
+        file_exclude = ('kodi.log')  # , 'Textures13.db', 'commoncache.db', 'Addons26.db', 'Addons27.db')
+        # db_vers = max(re.findall('Addons\d+.db', str(os.listdir(xbmc.translatePath('special://database')))))
+        # file_exclude += db_vers
+        try:
             for (root, dirs, files) in os.walk(home_path, topdown=True):
                 dirs[:] = [dir for dir in dirs if dir not in sub_dir_exclude]
                 files[:] = [file for file in files if file not in file_exclude]
@@ -50,16 +52,16 @@ def startup_freshstart():
                         pass
                 for file_name in files:
                     try:
-                        pass  # os.remove(os.path.join(root, file_name))
+                        os.remove(os.path.join(root, file_name))
                     except:
                         pass
             kodi.message(AddonTitle, "Done! , You are now back to a fresh Kodi configuration!",
                          "Click OK to exit Kodi and then restart to complete .")
             xbmc.executebuiltin('ShutDown')
-        # except Exception as e:
-        #     kodi.log("Freshstart User files partially removed - " + str(e))
-        #     kodi.message(AddonTitle, 'Done! , Freshstart User files partially removed',
-        #                  'Please check the log')
+        except Exception as e:
+            kodi.log("Freshstart User files partially removed - " + str(e))
+            kodi.message(AddonTitle, 'Done! , Freshstart User files partially removed',
+                         'Please check the log')
 
 
 def xEB(t):

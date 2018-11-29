@@ -2,11 +2,16 @@ import base64
 import os
 import re
 import shutil
-import urllib2
+import datetime
 import xbmc
 import xbmcaddon
 
 from libs import kodi
+
+# try:
+#     from urllib.request import urlopen, Request  # python 3.x
+# except ImportError:
+#     from urllib2 import urlopen, Request  # python 2.x
 
 addon_id = kodi.addon_id
 
@@ -27,15 +32,16 @@ def service_checks():
 def scriptblock_checks():
     if kodi.get_setting('scriptblock') == 'true':
         kodi.log('SCRIPT BLOCKER ON')
-        try:
-            req = urllib2.Request(BlocksUrl)
-            req.add_header('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
-            response = urllib2.urlopen(req)
-        except:
-            kodi.log('Could not perform blocked script check. invalid URL')
-            return
-        link = response.read()
-        response.close()
+        link = kodi.read_file(BlocksUrl)
+        # try:
+        #     req = Request(BlocksUrl)
+        #     req.add_header('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
+        #     response = urlopen(req)
+        # except:
+        #     kodi.log('Could not perform blocked script check. invalid URL')
+        #     return
+        # link = response.read()
+        # response.close()
         link = link.replace('\n', '').replace('\r', '').replace('\a', '')
 
         match = re.compile('block="(.+?)"').findall(link)

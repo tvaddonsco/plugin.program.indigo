@@ -63,7 +63,7 @@ def get_keyboard(default="", heading="", hidden=False):
     keyboard = xbmc.Keyboard(default, heading, hidden)
     keyboard.doModal()
     if keyboard.isConfirmed():
-        return unicode(keyboard.getText(), "utf-8")
+        return str(keyboard.getText().encode("utf-8"))
     return default
 
 
@@ -141,7 +141,7 @@ def archive_cb(sourcefile, message_header, message1, message2, message3, exclude
                 dp.update(int(progress), "Archiving..", '[COLOR blue]%s[/COLOR]' % file_n, '')
                 fp = os.path.join(base, file_n)
                 zipobj.write(fp, fp[rootlen:])
-            except Exception, e:
+            except Exception as e:
                 kodi.log(str(e))
     zipobj.close()
     dp.close()
@@ -176,13 +176,13 @@ def remove_paths(path):
                 for name in files:
                     try:
                         os.unlink(os.path.join(root, name))
-                    except Exception, e:
+                    except Exception as e:
                         kodi.log(str(e))
                 for name in dirs:
                     try:
                         os.rmdir(os.path.join(root, name))
                         os.rmdir(root)
-                    except Exception, e:
+                    except Exception as e:
                         kodi.log(str(e))
         except:
             traceback.print_exc(file=sys.stdout)
@@ -282,10 +282,10 @@ def unzip(_in, _out, dp):
             dp.update(int(update), '', '', '[COLOR dodgerblue][B]' + str(item.filename) + '[/B][/COLOR]')
             try:
                 zin.extract(item, _out)
-            except Exception, e:
-                print str(e)
-    except Exception, e:
-        print str(e)
+            except Exception as e:
+                print(str(e))
+    except Exception as e:
+        print(str(e))
         return False
     return True
 

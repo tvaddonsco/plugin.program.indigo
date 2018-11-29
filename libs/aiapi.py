@@ -1,4 +1,5 @@
-from libs import requests
+# from libs import requests
+import requests
 
 
 XHR = {'X-Requested-With': 'XMLHttpRequest'}
@@ -42,9 +43,9 @@ def get_langs():
     return _call(url)
 
 
-def get_id(type):
+def get_id(types):
     url = '/get_id'
-    params = {'query': type}
+    params = {'query': types}
     return _call(url, params=params)
 
 
@@ -61,16 +62,20 @@ def special_addons(query, area=''):
         area = '/sportsAddons.json'
     feat = []
     links = requests.get(base + area)
+    if str(links) == '<Response [404]>':
+        return feat
     link = links.json()
     for a in link['addons']:
         feat.append(a)
     return feat
 
 
-def _call(url, params=None, headers=Default_Headers, verify_ssl=True, timeout=default_timeout):
+def _call(url, params=None, headers='', verify_ssl=True, timeout=default_timeout):
+    if not headers:
+        headers = Default_Headers
     r = requests.get(base_url+url, params=params, headers=headers, verify=verify_ssl, allow_redirects=True,
                      timeout=timeout)
-    print '\t\tr = ' + str(r)
-    print '\t\turl = ' + str(base_url+url)
+    print('\t\tr = ' + str(r))
+    print('\t\turl = ' + str(base_url+url))
     result = r.json()
     return result

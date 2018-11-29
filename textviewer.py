@@ -5,10 +5,13 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 
-try:
-    from urllib.request import urlopen, Request  # python 3.x
-except ImportError:
-    from urllib2 import urlopen, Request  # python 2.x
+from libs import kodi
+
+# try:
+#     from urllib.request import urlopen, Request  # python 3.x
+# except ImportError:
+#     from urllib2 import urlopen, Request  # python 2.x
+
 
 Addon = xbmcaddon.Addon()
 addon = Addon.getAddonInfo('id')
@@ -194,7 +197,8 @@ def _is_debugging():
 
 
 def execute_jsonrpc(command):
-    if not isinstance(command, basestring):
+    # if not isinstance(command, basestring):
+    if not isinstance(command, str):
         command = json.dumps(command)
     response = xbmc.executeJSONRPC(command)
     return json.loads(response)
@@ -204,7 +208,7 @@ def keyboard(default="", heading="", hidden=False):
     kb = xbmc.Keyboard(default, heading, hidden)
     kb.doModal()
     if kb.isConfirmed() and kb.getText():
-        return unicode(kb.getText(), "utf-8")
+        return str(kb.getText()).encode("utf-8")
     del kb
 
 
@@ -232,11 +236,9 @@ def text_view(t_path='', t_contents='', d_path=''):
                 return
         if 'http' in t_path.lower():  # string.lower(t_path):
             try:
-                req = Request(path)
-                req.add_header('User-Agent', 'Mozilla/5.0 (Windows U Windows NT 5.1 en-GB rv:1.9.0.3) Gecko/2008092417 '
-                                             'Firefox/3.0.3')
-                t_contents = urlopen(req).read()
-            except IOError:
+                t_contents = kodi.read_file(t_path)
+            except Exception as e:
+                print(str(e))
                 t_contents = 'The web site seems to be having trouble or the file could not be read' \
                              '\nPlease try again later'
         else:

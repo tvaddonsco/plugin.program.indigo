@@ -15,16 +15,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import xbmcgui
-import urllib2
+# import urllib2
 import socket
 from libs import kodi
 import time
+
+try:
+    from urllib.request import urlopen, Request  # python 3.x
+except ImportError:
+    from urllib2 import urlopen, Request  # python 2.x
 
 class MyException(Exception):
     pass
 
 def download(url, dest, dp = None,timeout = None):
-    if timeout == None:
+    if not timeout:
         timeout = 120
 
     try:
@@ -33,7 +38,7 @@ def download(url, dest, dp = None,timeout = None):
             dp.create("Status...","Checking Installation",' ', ' ')
         dp.update(0)
         start_time = time.time()
-        u = urllib2.urlopen(url, timeout = timeout)
+        u = urlopen(url, timeout=timeout)
         h = u.info()
         totalSize = int(h["Content-Length"])
         fp = open(dest, 'wb')
@@ -60,11 +65,12 @@ def download(url, dest, dp = None,timeout = None):
                     raise Exception("Canceled")
         timetaken =  time.time() - start_time
         kodi.log('Duration of download was %.02f secs ' % timetaken )
-    except socket.timeout, e:
+    # except socket.timeout as e:
+    except Exception as e:
         # For Python 2.7
         kodi.message("There was an error: %r" % e, 'Files could not be downloaded at this time', 'Please try again later, Attempting to continue...')
         return
-    except urllib2.HTTPError as e:
+    except Exception as e:
         kodi.message("There was an error:", str(e),'Please try again later, Attempting to continue...')
         return
 
