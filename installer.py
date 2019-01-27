@@ -5,7 +5,7 @@ import downloader
 import extract
 import os
 import re
-import ssl
+# import ssl
 import string
 import sys
 import time
@@ -22,15 +22,11 @@ from libs import aiapi
 from libs import kodi
 from libs import viewsetter
 
-# try:
-#     from urllib.request import urlopen, Request  # python 3.x
-# except ImportError:
-#     from urllib2 import urlopen, Request  # python 2.x
 
-if kodi.get_kversion() > 16.5:
-    ssl._create_default_https_context = ssl._create_unverified_context
-else:
-    pass
+# if kodi.get_kversion() > 16.5:
+#     ssl._create_default_https_context = ssl._create_unverified_context
+# else:
+#     pass
 
 siteTitle = "TVADDONS.CO"
 AddonTitle = kodi.AddonTitle

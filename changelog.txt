@@ -1,3 +1,7 @@
+V4.0.10
+- Fixed Sports Listing guide due to a site change
+- Changed Kodi version reporting in System Info to reflect test versions of Kodi
+
 V4.0.9
 - Fixes for Notification and Installer, Git Browser called to open directly after install
 - Moved all UrlOpen calls to Kodi.py - Read_page function

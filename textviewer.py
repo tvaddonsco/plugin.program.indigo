@@ -269,7 +269,6 @@ def window():
 
 def display(re_path, re_content, re_mode='log'):
     global path, content, mode
-    # global content
     path = re_path
     content = re_content
     mode = re_mode

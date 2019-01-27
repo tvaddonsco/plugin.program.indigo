@@ -178,25 +178,36 @@ def what_sports():
     kodi.addItem('[COLOR blue][B]US Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
                  description='[COLOR gold]Sports from around the US[/COLOR]')
     link = kodi.read_file('https://www.tvguide.com/sports/live-today/')
-    match = re.findall('(?s)program-link">([^<]*)<.+?info">([^\|]*) \| ([^<]*)<.+?description">([^<]*)', link)
-    for m_name, m_time, m_channel, m_description in match:
+    pattern = '(?s)program-link">([^<]*)<.+?info">([^\|]*)\| ([^<]*)<.+?description">([^<]*)'
+    for m_name, m_time, m_channel, m_description in re.findall(pattern, link):
         kodi.addItem('[COLOR white][B]%s[/COLOR][/B] - [COLOR gold]%s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
                      % (m_time.lower(), name_cleaner(m_name), m_channel), '', '', artwork + 'icon.png',
                      description='[COLOR gold][B]%s - %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
                                  % (m_description, name_cleaner(m_name), m_time.lower(), m_channel))
+
     # #######  UK  ###############
     kodi.addItem('[COLOR blue][B]UK Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
                  description='[COLOR gold]Sports from around the UK[/COLOR]')
-    link = kodi.read_file('http://www.wheresthematch.com/tv/home.asp').replace('\r', '').replace('\n', '').replace('\t', '')
-    pattern ='(?s)class="fixture">.+?href="http:\/\/[^\/]*\/([^\/]*)\/[^\.]*.asp">[^>]*>([^<]+)<.+?asp.+?">([^<]*)<' \
-             '.+?WHEN:<\/strong>([^&]*&).+?\/strong>([^<]*)'
-    match = re.findall(pattern, link)
-    for game, name1, name2, gametime, channel in match:
-        gametime = re.search('at([^&]*)', gametime).group(1).replace('&', '').replace(' ', '')
-        kodi.addItem('[COLOR white][B]%s[/COLOR][/B][COLOR gold] - %s - %s vs %s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
-                     % (gametime, game, name1, name2, channel), '', '', artwork+'icon.png',
-                     description='[COLOR gold][B]%s - %s vs %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
-                                 % (game, name1, name2, gametime, channel))
+    link = kodi.read_file('http://www.wheresthematch.com/').replace('\r', '').replace('\n', '').replace('\t', '')
+    pattern = '(?s)fixture-details">(.+?)t-details">(.+?)-name">(.+?)l-details">(.+?).png'
+    for m_game, m_time, m_league, m_channels in re.findall(pattern, link):
+        g_time = re.search('<strong>([^<]*)', m_time)
+        g_time = g_time.group(1).strip('0').replace(' ', '') if g_time else ''
+        league = re.search('<span>([^<]*)', m_league)
+        g_league = ' - ' + league.group(1) if league else ''
+        g_name = ''
+        for team1, team2 in re.findall('(?s).asp">[^>]*>([^<]+)<.+?asp.+?">([^<]*)', m_game):
+            g_name = '- %s vs %s' % (team1, team2) if m_game else ''
+        if '<strong class=' in m_game:
+            game = re.search('<strong class="">([^<]*)', m_game)
+            g_name = ' - ' + game.group(1) if game and league != game.group(1) else ''
+        channels = ''
+        for channel in re.findall('-name">([^<]*)', m_channels):
+            channels += ' ' + channel if not channels else ', ' + channel
+        kodi.addItem('[COLOR white][B]%s[/COLOR][/B][COLOR gold]%s %s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
+                     % (g_time, g_league, g_name, channels), '', '', artwork + 'icon.png',
+                     description='[COLOR gold][B]%s - %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
+                                 % (g_time, g_name, g_league, channels))
     viewsetter.set_view("tvshows")
 
 
@@ -255,12 +266,9 @@ def system_info():
     freemem = maintool.convert_size(maintool.revert_size(xbmc.getInfoLabel('System.FreeMemory')))
     
     # FIND WHAT VERSION OF KODI IS RUNNING
-    xbmc_version = xbmc.getInfoLabel("System.BuildVersion")
-    versioni = xbmc_version[:4]
-    # versions = {10: 'Dharma', 11: 'Eden', 12: 'Frodo', 13: 'Gotham', 14: 'Helix', 15: 'Isengard', 16: 'Jarvis',
-    #             17: 'Krypton', 18: 'Leia'}
-    # codename = versions.get(int(xbmc_version[:2]))
-    codename = kodi.get_codename()
+    # xbmc_version = xbmc.getInfoLabel("System.BuildVersion")
+    # versioni = xbmc_version[:4]
+    # codename = kodi.get_codename()
 
     # Get External IP Address
     try:
@@ -279,8 +287,11 @@ def system_info():
     pv = sys.version_info
     
     # System Information Menu
-    kodi.addItem('[COLOR ghostwhite]Version: [/COLOR][COLOR lime] %s %s[/COLOR]' % (codename, versioni),
-                 '', 100, artwork + 'icon.png', "", description=" ")
+    # kodi.addItem('[COLOR ghostwhite]Version: [/COLOR][COLOR lime] %s %s[/COLOR]' % (codename, versioni),
+    #              '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.addItem('[COLOR ghostwhite]Version: [/COLOR][COLOR lime] %s %s[/COLOR]' %
+                 (kodi.get_codename(), xbmc.getInfoLabel("System.BuildVersion").split('Git')[0]),'',
+                 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]System Time: [/COLOR][COLOR lime] %s[/COLOR]' % systime,
                  '', 100, artwork + 'icon.png', "", description=" ")
     kodi.addItem('[COLOR ghostwhite]Gateway: [/COLOR][COLOR blue] %s[/COLOR]' % gateway,
