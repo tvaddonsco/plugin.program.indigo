@@ -34,6 +34,7 @@ KEY_ESC = 61467
 
 
 class PopupNote(xbmcgui.WindowXMLDialog):
+    xbmc.executebuiltin("UpdateAddonRepos")
     contents = ''
     note = 4001
     support = 4002
@@ -73,17 +74,12 @@ class PopupNote(xbmcgui.WindowXMLDialog):
             settings.setSetting("noteType", '')
             settings.setSetting("noteImage", '')
             settings.setSetting("noteMessage", '')
+            #xbmc.executebuiltin("UpdateAddonRepos")
+            #xbmc.sleep(50)
             self.close()
-            if not xbmc.getCondVisibility('System.HasAddon(plugin.git.browser)'):
-                if kodi.get_kversion() > 16:
-                    xbmc.executebuiltin("XBMC.InstallAddon(plugin.git.browser)")
-                    xbmc.sleep(14000)
-                    xbmc.executebuiltin("RunAddon(plugin.git.browser)")
-                else:
-                    xbmc.executebuiltin("XBMC.RunPlugin(plugin://plugin.git.browser)")
-            else:
-                xbmc.executebuiltin("XBMC.Container.Update(plugin://plugin.git.browser)")
-
+            import installer
+            installer.github_main('')
+            
         elif control_id == self.remind_later:
             settings.setSetting("noteType", '')
             settings.setSetting("noteImage", '')

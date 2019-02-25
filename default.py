@@ -102,11 +102,14 @@ def main_menu():
         if not os.path.exists(hubpath):
             installer.HUBINSTALL('repository.xbmchub', 'http://github.com/tvaddonsco/tva-release-repo/raw/master/'
                                                        'repository.xbmchub/', 'repository.xbmchub')
-            xbmc.executebuiltin("XBMC.InstallAddon(%s)" % 'repository.xbmchub')
+            # xbmc.executebuiltin("XBMC.InstallAddon(%s)" % 'repository.xbmchub')
             addon_able.set_enabled("repository.xbmchub")
             xbmc.executebuiltin("XBMC.UpdateAddonRepos()")
     except Exception as e:
         kodi.log(str(e))
+        import traceback
+        traceback.print_exc(file=sys.stdout)
+        raise
     # Check for Log Uploader and install it
     try:
         if not os.path.exists(uploaderpath):
@@ -118,6 +121,7 @@ def main_menu():
             xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
     except Exception as e:
         kodi.log(str(e))
+        raise
    
     # Check for old maintenance tools and remove them
     old_maintenance = (oldinstaller, oldnotify, oldmain, oldwiz, oldfresh)

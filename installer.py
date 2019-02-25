@@ -92,6 +92,7 @@ params = get_params()
 
 # ****************************************************************
 def MAININDEX():
+    xbmc.executebuiltin("UpdateAddonRepos")
     kodi.addItem("Git Browser", '', 'github_main', artwork + 'github_browser.png',
                  description="Search for repositories hosted on GitHub.")
     kodi.addDir('Search by: Addon/Author', '', 'searchaddon', artwork + 'search.png',
@@ -181,15 +182,23 @@ viewsetter.set_view("sets")
 
 
 def github_main(url):
-    if not xbmc.getCondVisibility('System.HasAddon(plugin.git.browser)'):
-        if kodi.get_kversion() > 16:
-            xbmc.executebuiltin("XBMC.InstallAddon(plugin.git.browser)")
-            xbmc.sleep(14000)
-            xbmc.executebuiltin("RunAddon(plugin.git.browser)")
+    try:
+        kodi.log('github_main ' + str(xbmc.getCondVisibility('System.HasAddon(repository.xbmchub)')))
+        if not xbmc.getCondVisibility('System.HasAddon(plugin.git.browser)'):
+            if kodi.get_kversion() > 16:
+                xbmc.executebuiltin("InstallAddon(plugin.git.browser)")
+                timeout = time.time() + 15
+                while not xbmc.getCondVisibility('System.HasAddon(plugin.git.browser)'):
+                    xbmc.sleep(1000)
+                    if time.time() > timeout:
+                        break
+                xbmc.executebuiltin("RunAddon(plugin.git.browser)")
+            else:
+                xbmc.executebuiltin("XBMC.RunPlugin(plugin://plugin.git.browser)")
         else:
-            xbmc.executebuiltin("XBMC.RunPlugin(plugin://plugin.git.browser)")
-    else:
-        xbmc.executebuiltin("XBMC.Container.Update(plugin://plugin.git.browser)")
+            xbmc.executebuiltin("XBMC.Container.Update(plugin://plugin.git.browser)")
+    except:
+        traceback.print_exc(file=sys.stdout)
 
 
 # ********************************************************************

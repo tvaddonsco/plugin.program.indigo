@@ -88,24 +88,25 @@ ALL_VIEW_CODES = {
 
 def set_view(view_mode, view_code=0):
     if get_setting('auto-view') == 'true':
-
-        # Set the content for extended library views if needed
-        xbmcplugin.setContent(int(sys.argv[1]), view_mode)
-        if view_mode == MOVIES:
-            xbmcplugin.setContent(int(sys.argv[1]), "movies")
-        elif view_mode == TV_SHOWS:
-            xbmcplugin.setContent(int(sys.argv[1]), "tvshows")
-        elif view_mode == SEASONS:
-            xbmcplugin.setContent(int(sys.argv[1]), "seasons")
-        elif view_mode == EPISODES:
-            xbmcplugin.setContent(int(sys.argv[1]), "episodes")
-        elif view_mode == THUMBNAIL:
-            xbmcplugin.setContent(int(sys.argv[1]), "thumbnail")
-        elif view_mode == LIST:
-            xbmcplugin.setContent(int(sys.argv[1]), "list")
-        elif view_mode == SETS:
-            xbmcplugin.setContent(int(sys.argv[1]), "sets")
-
+        try:
+            # Set the content for extended library views if needed
+            xbmcplugin.setContent(int(sys.argv[1]), view_mode)
+            if view_mode == MOVIES:
+                xbmcplugin.setContent(int(sys.argv[1]), "movies")
+            elif view_mode == TV_SHOWS:
+                xbmcplugin.setContent(int(sys.argv[1]), "tvshows")
+            elif view_mode == SEASONS:
+                xbmcplugin.setContent(int(sys.argv[1]), "seasons")
+            elif view_mode == EPISODES:
+                xbmcplugin.setContent(int(sys.argv[1]), "episodes")
+            elif view_mode == THUMBNAIL:
+                xbmcplugin.setContent(int(sys.argv[1]), "thumbnail")
+            elif view_mode == LIST:
+                xbmcplugin.setContent(int(sys.argv[1]), "list")
+            elif view_mode == SETS:
+                xbmcplugin.setContent(int(sys.argv[1]), "sets")
+        except:
+            pass
         skin_name = xbmc.getSkinDir()  # Reads skin name
         try:
             if view_code == 0:
