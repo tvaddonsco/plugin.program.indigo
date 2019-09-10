@@ -1,3 +1,6 @@
+V4.0.13
+- Temporary removal of broken sections
+
 V4.0.12
 - Fixed Kodi 18 compatibility issues
 

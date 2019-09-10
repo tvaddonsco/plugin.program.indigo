@@ -46,8 +46,7 @@ dialog = xbmcgui.Dialog()
 Keymaps_URL = 'http://indigo.tvaddons.co/keymaps/customkeys.txt'
 KEYBOARD_FILE = xbmc.translatePath(os.path.join('special://home/userdata/keymaps/', 'keyboard.xml'))
 openSub = "https://github.com/tvaddonsco/tva-release-repo/raw/master/service.subtitles.opensubtitles_by_opensubtitles/"
-burst_url = "http://burst.surge.sh/release/script.quasar.burst-0.5.8.zip"
-# tvpath = "https://oldgit.com/tvaresolvers/tva-common-repository/raw/master/zips/"
+burst_url = "http://burst.surge.sh/release/script.quasar.burst-0.6.0.zip"
 tvpath = "https://github.com/tvaddonsco/tva-resolvers-repo/raw/master/zips"
 tva_repo = 'https://github.com/tvaddonsco/tva-release-repo/tree/master/'
 kodi_url = "http://mirrors.kodi.tv/addons/" + kodi.get_codename().lower() + '/'
@@ -95,8 +94,8 @@ def MAININDEX():
     xbmc.executebuiltin("UpdateAddonRepos")
     kodi.addItem("Git Browser", '', 'github_main', artwork + 'github_browser.png',
                  description="Search for repositories hosted on GitHub.")
-    kodi.addDir('Search by: Addon/Author', '', 'searchaddon', artwork + 'search.png',
-                description="Search for addons by Name or Author")
+    #kodi.addDir('Search by: Addon/Author', '', 'searchaddon', artwork + 'search.png',
+    #            description="Search for addons by Name or Author")
     if settings.getSetting('featured') == 'true':
         kodi.addDir('Featured Addons', 'featured', 'addonlist', artwork + 'featured.png',
                     description="The most popular Kodi addons!")

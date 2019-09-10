@@ -12,16 +12,16 @@
         <setting visible="false" id="newest" type="bool" label="Newest Added" default="true"/>
         <setting visible="false" id="updated" type="bool" label="Recently Updated" default="true"/>
         <setting visible="false" id="toprepositories" type="bool" label="Top Developers Section" default="true"/>
-        <setting visible="true" id="skincat" type="bool" label="Skins" default="true"/>
-        <setting visible="true" id="featured" type="bool" label="Featured Section" default="true"/>
+        <!--<setting visible="true" id="skincat" type="bool" label="Skins" default="true"/>-->
+        <!--<setting visible="true" id="featured" type="bool" label="Featured Section" default="true"/>-->
         <!--<setting visible="true" id="livetv" type="bool" label="Live TV Section" default="true"/>-->
         <!--<setting visible="true" id="sports" type="bool" label="Sports Section" default="true"/>-->
         <!--<setting visible="true" id="playlist" type="bool" label="Playlists Section" default="true"/>-->
-        <setting visible="true" id="video" type="bool" label="Video Section" default="true"/>
-        <setting visible="true" id="audio" type="bool" label="Audio Section" default="true"/>
-        <setting visible="true" id="program" type="bool" label="Programs Section" default="true"/>
-        <setting visible="false" id="repositories" type="bool" label="Repositories Section" default="false"/>
-        <setting visible="true" id="world" type="bool" label="International Section" default="true"/>
+        <!--<setting visible="true" id="video" type="bool" label="Video Section" default="true"/>-->
+        <!--<setting visible="true" id="audio" type="bool" label="Audio Section" default="true"/>-->
+        <!--<setting visible="true" id="program" type="bool" label="Programs Section" default="true"/>-->
+        <!--<setting visible="false" id="repositories" type="bool" label="Repositories Section" default="false"/>-->
+        <!--<setting visible="true" id="world" type="bool" label="International Section" default="true"/>-->
         <setting visible="true" id="adult" type="bool" label="Adult Section" default="false"/>
         <setting visible="true" id="github_key" type="text" label="GitHub Personal API Key" default=""/>
         <setting visible="false" id="wizardran" type="bool" label="Wizard Ran" default="false"/>
