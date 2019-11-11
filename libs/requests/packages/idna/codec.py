@@ -72,8 +72,8 @@ class IncrementalDecoder(codecs.BufferedIncrementalDecoder):
             labels = _unicode_dots_re.split(data)
         else:
             # Must be ASCII string
-            data = str(data)
-            unicode(data, "ascii")
+            data = str(data).encode(encoding='ascii', errors='strict')
+            # unicode(data, "ascii")
             labels = data.split(".")
 
         trailing_dot = u''
