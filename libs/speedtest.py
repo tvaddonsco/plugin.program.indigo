@@ -36,7 +36,8 @@ def download(url, dest, dp=None):
     try:
         urllib.urlretrieve(url, dest, lambda nb, bs, fs: _pbhook(nb, bs, fs, dp, start_time))
     except:
-        pass
+        urllib.request.urlretrieve(url, dest, lambda nb, bs, fs: _pbhook(nb, bs, fs, dp, start_time))
+
     return time.time() - start_time
 
 
@@ -134,8 +135,8 @@ def runfulltest(url):
         livestreams = 'All streams including HD should stream fine'
         onlinevids = 'You can play all movies (720p, 1080p, 3D and 4K)'
         rating = '[COLOR ghostwhite][B][I]Excellent[/I]   | Score: [COLOR slategray][I]10/10[/I][/B][/COLOR]'
-    print "Average Speed: " + str(avgspeed)
-    print "Max. Speed: " + str(maxspeed)
+    print("Average Speed: " + str(avgspeed))
+    print("Max. Speed: " + str(maxspeed))
     dialog = xbmcgui.Dialog()
     ok = dialog.ok(
         '[COLOR lightsteelblue][B]Your Result:[/COLOR][/B] ' + rating,

@@ -30,7 +30,7 @@ def set_enabled(newaddon, data=None):
         conn.execute(sql, (newaddon, setit, date_time,))
         conn.commit()
         # xbmc.executebuiltin("InstallAddon(%s)" % newaddon)
-        xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
+        # xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
     else:
         pass
 
