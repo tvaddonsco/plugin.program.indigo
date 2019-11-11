@@ -5,10 +5,13 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 
-try:
-    from urllib.request import urlopen, Request  # python 3.x
-except ImportError:
-    from urllib2 import urlopen, Request  # python 2.x
+from libs import kodi
+
+# try:
+#     from urllib.request import urlopen, Request  # python 3.x
+# except ImportError:
+#     from urllib2 import urlopen, Request  # python 2.x
+
 
 Addon = xbmcaddon.Addon()
 addon = Addon.getAddonInfo('id')
@@ -38,7 +41,7 @@ class Viewer(xbmcgui.WindowXML):
     mouse_controls = 4300
 
     def __init__(self, xml_name, fallback_path, skin_folder):
-        super(Viewer, self).__init__(self, xml_name, fallback_path, skin_folder)
+        super(Viewer,self).__init__()
         self.page_up = 5
         self.page_down = 6
         self.previous_menu = 10
@@ -194,7 +197,8 @@ def _is_debugging():
 
 
 def execute_jsonrpc(command):
-    if not isinstance(command, basestring):
+    # if not isinstance(command, basestring):
+    if not isinstance(command, str):
         command = json.dumps(command)
     response = xbmc.executeJSONRPC(command)
     return json.loads(response)
@@ -204,7 +208,7 @@ def keyboard(default="", heading="", hidden=False):
     kb = xbmc.Keyboard(default, heading, hidden)
     kb.doModal()
     if kb.isConfirmed() and kb.getText():
-        return unicode(kb.getText(), "utf-8")
+        return str(kb.getText()).encode("utf-8")
     del kb
 
 
@@ -232,11 +236,9 @@ def text_view(t_path='', t_contents='', d_path=''):
                 return
         if 'http' in t_path.lower():  # string.lower(t_path):
             try:
-                req = Request(path)
-                req.add_header('User-Agent', 'Mozilla/5.0 (Windows U Windows NT 5.1 en-GB rv:1.9.0.3) Gecko/2008092417 '
-                                             'Firefox/3.0.3')
-                t_contents = urlopen(req).read()
-            except IOError:
+                t_contents = kodi.read_file(t_path)
+            except Exception as e:
+                print(str(e))
                 t_contents = 'The web site seems to be having trouble or the file could not be read' \
                              '\nPlease try again later'
         else:
@@ -248,15 +250,15 @@ def text_view(t_path='', t_contents='', d_path=''):
             # Open and read the file from path location
             try:
                 with open(t_path, 'rb') as temp_file:
-                    t_contents = temp_file.read()
+                    t_contents = temp_file.read().decode('utf-8')
             except IOError:
                 t_contents = 'Could not read the file'
     if not t_contents:
         t_contents = 'The file was empty'
     # Set contents for text display function
-    t_contents = t_contents.replace(' ERROR: ', ' [COLOR red]ERROR[/COLOR]: ') \
+    tr_contents = t_contents.replace(' ERROR: ', ' [COLOR red]ERROR[/COLOR]: ') \
         .replace(' WARNING: ', ' [COLOR gold]WARNING[/COLOR]: ')
-    return t_path, t_contents
+    return t_path, tr_contents
 
 
 def window():
@@ -267,7 +269,6 @@ def window():
 
 def display(re_path, re_content, re_mode='log'):
     global path, content, mode
-    # global content
     path = re_path
     content = re_content
     mode = re_mode

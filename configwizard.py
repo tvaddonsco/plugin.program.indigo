@@ -5,10 +5,11 @@ import os
 import re
 import sys
 import urllib
-import urllib2
+
 import xbmc
 import xbmcgui
 import xbmcplugin
+
 
 from libs import addon_able
 from libs import kodi
@@ -21,21 +22,19 @@ cutslink = "http://indigo.tvaddons.co/wizard/shortcuts.txt"
 
 
 # ========================== Help WIZARD ===============================================================================
-def HELPCATEGORIES():
-    filetype = 'main'
-    link = OPEN_URL(wizlink).replace('\n', '').replace('\r', '').replace('\a', '').strip()
-    HELPWIZARD('configwiz', link, '', 'main', )
+def HELPCATEGORIES(filetype='main'):
+    link = kodi.read_file(wizlink).replace('\n', '').replace('\r', '').replace('\a', '').strip()
+    HELPWIZARD('configwiz', link, '', filetype, )
 
 
 # # ### ##
 def HELPWIZARD(name, url, description, filetype):
-    path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
-    confirm = xbmcgui.Dialog().yesno("Please Confirm",
-                                     "                Please confirm that you wish to automatically",
-                                     "            configure Kodi with all the best addons and tweaks!",
-                                     "              ", "Cancel", "Install")
+    # path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
     filetype = filetype.lower()
-    if confirm:
+    if xbmcgui.Dialog().yesno("Please Confirm",
+                              "                Please confirm that you wish to automatically",
+                              "            configure Kodi with all the best addons and tweaks!",
+                              "              ", "Cancel", "Install"):
         path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
         dp = xbmcgui.DialogProgress()
         dp.create(AddonTitle, " ", 'Downloading and Configuring ', 'Please Wait')
@@ -46,13 +45,13 @@ def HELPWIZARD(name, url, description, filetype):
             pass
         # ## ## ... ##
         # kodi.log(url)
-        if str(url).endswith('[error]'):
-            print url
-            dialog = xbmcgui.Dialog()
-            dialog.ok("Error!", url)
-            return
+        # if str(url).endswith('[error]'):
+        #     print(url)
+        #     dialog = xbmcgui.Dialog()
+        #     dialog.ok("Error!", url)
+        #     return
         if '[error]' in url:
-            print url
+            print(url)
             dialog = xbmcgui.Dialog()
             dialog.ok("Error!", url)
             return
@@ -64,7 +63,7 @@ def HELPWIZARD(name, url, description, filetype):
         elif filetype == 'addon':
             addonfolder = xbmc.translatePath(os.path.join('special://home', 'addons'))
         else:
-            print {'filetype': filetype}
+            print({'filetype': filetype})
             dialog = xbmcgui.Dialog()
             dialog.ok("Error!", 'filetype: "%s"' % str(filetype))
             return
@@ -81,12 +80,13 @@ def HELPWIZARD(name, url, description, filetype):
             addon_able.set_enabled("inputstream.rtmp")
         except:
             pass
+        xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
         try:
             os.remove(lib)
         except:
             pass
         if filetype == 'main':
-            link = OPEN_URL(cutslink)
+            link = kodi.read_file(cutslink)
             shorts = re.compile('shortcut="(.+?)"').findall(link)
             for shortname in shorts:
                 xEB('Skin.SetString(%s)' % shortname)
@@ -98,15 +98,15 @@ def HELPWIZARD(name, url, description, filetype):
         xbmc.sleep(4000)
         xbmc.executebuiltin('XBMC_UpdateLocalAddons()')
         addon_able.setall_enable()
-        try:
-            addon_able.set_enabled("inputstream.adaptive")
-        except:
-            pass
-        xbmc.sleep(4000)
-        try:
-            addon_able.set_enabled("inputstream.rtmp")
-        except:
-            pass
+        # try:
+        #     addon_able.set_enabled("inputstream.adaptive")
+        # except:
+        #     pass
+        # xbmc.sleep(4000)
+        # try:
+        #     addon_able.set_enabled("inputstream.rtmp")
+        # except:
+        #     pass
         kodi.set_setting("wizardran", 'true')
 
         dialog = xbmcgui.Dialog()
@@ -124,16 +124,6 @@ def addHELPDir(name, url, mode, iconimage, fanart, description, filetype):
     liz.setProperty("Fanart_Image", fanart)
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
     return ok
-
-
-def OPEN_URL(url):
-    req = urllib2.Request(url)
-    req.add_header('User-Agent',
-                   'Mozilla/5.0 (Linux; U; Android 4.2.2; en-us; AFTB Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30')
-    response = urllib2.urlopen(req)
-    link = response.read()
-    response.close()
-    return link
 
 
 def xEB(t): xbmc.executebuiltin(t)

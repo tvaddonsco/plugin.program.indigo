@@ -1,8 +1,44 @@
+V4.0.14 
+- Kodi 18 Python-2/3 cross compatibility
+- Code Cleanup for Backup/Restore
+- Auto-Hide Addon Installer sections when API is down
+
+V4.0.13
+- Temporary removal of broken sections
+
+V4.0.12
+- Fixed compatibility issues
+
+V4.0.11
+- Fixed for issue with kodi 18 armV7 on first run/clean install
+
+V4.0.10
+- Fixed Sports Listing guide due to a site change
+- Changed Kodi version reporting in System Info to reflect test versions of Kodi
+
+V4.0.9
+- Fixes for Notification and Installer, Git Browser called to open directly after install
+- Moved all UrlOpen calls to Kodi.py - Read_page function
+- Fixed Sports listing guide
+- Fixes to Rejuvinate, Wipe Addons, and other little things
+- Code cleanup and compression
+- Prepare code for cross compatability with Python-2.7 and Python-3
+
+V4.0.8
+- Fixes for SSL error opening some web pages
+- Fixes for Auto Maintenance on platforms which don't report proper disk sizes
+
+V4.0.7
+- Fixed Addon Installer
+
+V4.0.6
+- Improved error control for issues with some devices and reporting disk sizes
+
 V4.0.5
 - Added No-Coin Crypto-Mining detection
 - Improved Log Viewer to support No-Coin reporting
 - Improvements to service.py and kodi.py for better Error Handling
-- Minor Code Cleanup to prepare for Python 3.x
+- Code Cleanup to prepare for Python 3.x
 
 V4.0.4.2
 - Improved Dependency Error Handling
