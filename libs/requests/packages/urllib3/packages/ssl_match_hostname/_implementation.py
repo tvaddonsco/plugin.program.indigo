@@ -79,6 +79,8 @@ def _dnsname_match(dn, hostname, max_wildcards=1):
 def _to_unicode(obj):
     if isinstance(obj, str) and sys.version_info < (3,):
         obj = unicode(obj, encoding='ascii', errors='strict')
+    else:
+        obj = str(obj).encode(encoding='ascii', errors='strict')
     return obj
 
 def _ipaddress_match(ipname, host_ip):
