@@ -29,6 +29,11 @@ try:
 except ImportError:
     import html.entities as htmlentitydefs  # python 3.x
 
+try:
+    unquote_plus = urllib.unquote_plus  # python 2.x
+except:
+    unquote_plus = urllib.parse.unquote_plus  # python 3.x
+
 addon_id = kodi.addon_id
 addon = (addon_id, sys.argv)
 artwork = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id, 'art/'))
@@ -410,6 +415,8 @@ def cleanse_title(text):
 def get_params():
     param = []
     paramstring = sys.argv[2]
+    kodi.log('\t\t\tPRAMSTRING= ' + str(paramstring), '')
+    kodi.log('\t\t\tsys.arg= ' + str(sys.argv), '')
     if len(paramstring) >= 2:
         params_l = sys.argv[2]
         cleanedparams = params_l.replace('?', '')
@@ -422,6 +429,7 @@ def get_params():
             splitparams = pairsofparams[i].split('=')
             if (len(splitparams)) == 2:
                 param[splitparams[0]] = splitparams[1]
+    kodi.log('\t\t\tparam= ' + str(param), '')
     return param
 
 
@@ -432,48 +440,51 @@ mode = None
 thumb = None
 
 try:
-    iconimage = urllib.unquote_plus(params["iconimage"])
+    iconimage = unquote_plus(params["iconimage"])
 except:
     # TypeError and KeyError
     pass
 try:
-    thumb = urllib.unquote_plus(params["thumb"])
+    # thumb = unquote_plus(params["thumb"])
+    thumb = unquote_plus(params["thumb"])
 except:
     pass
 try:
-    fanart = urllib.unquote_plus(params["fanart"])
+    fanart = unquote_plus(params["fanart"])
 except:
     pass
 try:
-    description = urllib.unquote_plus(params["description"])
+    description = unquote_plus(params["description"])
 except:
     description = None
 try:
-    filetype = urllib.unquote_plus(params["filetype"])
+    filetype = unquote_plus(params["filetype"])
 except:
     filetype = None
 try:
-    url = urllib.unquote_plus(params["url"])
+    url = unquote_plus(params["url"])
 except:
     pass
 try:
-    name = urllib.unquote_plus(params["name"])
+    name = unquote_plus(params["name"])
 except:
     pass
 try:
-    mode = urllib.unquote_plus(params["mode"])
+    kodi.log('PARAMS= ' + str(params), '')
+    mode = unquote_plus(params["mode"])
+
 except:
     pass
 try:
-    repourl = urllib.unquote_plus(params["repourl"])
+    repourl = unquote_plus(params["repourl"])
 except:
     repourl = None
 try:
-    xmlurl = urllib.unquote_plus(params["xmlurl"])
+    xmlurl = unquote_plus(params["xmlurl"])
 except:
     pass
 try:
-    dataurl = urllib.unquote_plus(params["dataurl"])
+    dataurl = unquote_plus(params["dataurl"])
 except:
     pass
 
@@ -700,10 +711,10 @@ elif mode == 'backup_restore':
     backup.backup_menu()
 
 elif mode == 'full_backup':
-    backup.full_backup()
+    backup.backup('full')
 
 elif mode == 'small_backup':
-    backup.no_data_backup()
+    backup.backup('no_data')
 
 elif mode == 'do_backup_restore':
     backup.restore()

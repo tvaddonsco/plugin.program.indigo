@@ -44,7 +44,7 @@ class PopupNote(xbmcgui.WindowXMLDialog):
     dismiss = 4006
 
     def __init__(self, xml_name, addons_path, skin_folder):
-        super(PopupNote, self).__init__(self, xml_name, addons_path, skin_folder)
+        super(PopupNote, self).__init__()  # (self, xml_name, addons_path, skin_folder)
         self.page_up = 5
         self.page_down = 6
         self.previous_menu = 10

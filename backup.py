@@ -2,7 +2,6 @@ import shutil
 import time
 import urllib
 import zipfile
-import traceback
 
 import os
 import sys
@@ -14,23 +13,13 @@ from libs import viewsetter
 
 dp = xbmcgui.DialogProgress()
 AddonTitle = kodi.addon.getAddonInfo('name')
-addon_id = kodi.addon_id
+addon_id = kodi.addon.getAddonInfo('id')
 selfAddon = xbmcaddon.Addon(id=addon_id)
 
-backupfull = selfAddon.getSetting('backup_database')
-backupaddons = selfAddon.getSetting('backup_addon_data')
 zip_setting = kodi.get_setting("zip")
 zip_path = xbmc.translatePath(os.path.join(zip_setting))
-
-# ICON = xbmc.translatePath(os.path.join('special://home/addons/' + addon_id, 'icon.png'))
 home_path = xbmc.translatePath('special://home/')
-addons_path = xbmc.translatePath(os.path.join('special://home', 'addons', ''))
-packages_path = xbmc.translatePath(os.path.join('special://home/addons/' + 'packages'))
-userdata_path = xbmc.translatePath(os.path.join('special://home/userdata', ''))
-addon_data_path = xbmc.translatePath(os.path.join(userdata_path, 'addon_data'))
-databases_path = xbmc.translatePath(os.path.join(userdata_path, 'Database'))
-navi_path = xbmc.translatePath(os.path.join(addons_path, 'script.navi-x'))
-excludes_folder = xbmc.translatePath(os.path.join(userdata_path, 'BACKUP'))
+logfile_name = xbmc.getInfoLabel('System.FriendlyName').split()[0].lower()
 dialog = xbmcgui.Dialog()
 
 
@@ -67,71 +56,53 @@ def get_keyboard(default="", heading="", hidden=False):
     return default
 
 
-# #############  Backup  ############################################
-
-def full_backup():
-    exclude_dirs = ['backupdir', 'cache', 'temp']
-    exclude_files = ["spmc.log", "spmc.old.log", "xbmc.log", "xbmc.old.log", "kodi.log", "kodi.old.log", "fretelly.log",
-                     "freetelly.old.log", "ftmc.log", "ftmc.old.log", "firemc.log", "firemc.old.log", "nodi.log", "nodi.old.log"]
-    message_header = "%s Is Creating A  Full  Backup..." % AddonTitle
-    message1 = "Archiving..."
-    message2 = ""
-    message3 = ""
-    archive_cb(home_path, message_header, message1, message2, message3, exclude_dirs, exclude_files)
-
-
-def no_data_backup():
-    exclude_dirs = ['backupdir', 'cache', 'temp', 'Thumbnails', 'Databases']
-    exclude_files = ["spmc.log", "spmc.old.log", "xbmc.log", "xbmc.old.log", "kodi.log", "kodi.old.log",
-                     "Textures13.db", "fretelly.log", "freetelly.old.log", "ftmc.log", "ftmc.old.log", "firemc.log", "firemc.old.log", "nodi.log", "nodi.old.log"]
-    message_header = "%s is creating the backup..." % AddonTitle
-    message1 = "Archiving..."
-    message2 = ""
-    message3 = ""
-    archive_cb(home_path, message_header, message1, message2, message3, exclude_dirs, exclude_files)
-
-
-def backup(type):
-    exclude_dirs = ['backupdir', 'cache', 'temp', 'Thumbnails', 'Databases']
-    exclude_files = ["spmc.log", "spmc.old.log", "xbmc.log", "xbmc.old.log", "kodi.log", "kodi.old.log", "freetelly.log",
-                     "freetelly.old.log", "ftmc.log", "ftmc.old.log", "firemc.log", "firemc.old.log", "nodi.log", "nodi.old.log"]
-    message_header = "%s Is Creating A Backup..." % AddonTitle
-    message1 = "Archiving..."
-    message2 = ""
-    message3 = ""
-    if type == 'full':
-        message_header = "%s Is Creating A  Full  Backup..." % AddonTitle
-        message1 = "Archiving..."
-    elif type == 'no_data':
-        exclude_dirs.extend(["Textures13.db"])
-        exclude_files.extend(["Textures13.db"])
-    else:
-        return
-
-    archive_cb(home_path, message_header, message1, message2, message3, exclude_dirs, exclude_files)
-
-
-def archive_cb(sourcefile, message_header, message1, message2, message3, exclude_dirs, exclude_files):
-    check_path()
-    # ##TODO check for file. Prompt to pick another name or replace the existing file
-    if not os.path.exists(zip_path):
-        os.makedirs(zip_path)
+def set_name():
     vq = get_keyboard(heading="Enter a name for this backup")
     if not vq:
-        return False, 0
-    # ##
-    title = urllib.quote_plus(vq)
-    destfile = xbmc.translatePath(os.path.join(zip_path, title + '.zip'))
-    zipobj = zipfile.ZipFile(destfile, 'w', zipfile.ZIP_DEFLATED)
-    rootlen = len(sourcefile)
+        return False
+    try:
+        title = urllib.quote_plus(vq)
+    except:
+        title = urllib.parse.quote_plus(vq)
+    return title
+
+
+# #############  Backup  ############################################
+
+def backup(b_type):
+    exclude_dirs = ['backupdir', 'cache', 'temp']
+    exclude_files = [logfile_name + '.log', logfile_name + '.old.log']
+    message_header = "%s Is Creating A %s Backup..." % (AddonTitle, b_type.replace('_', ' ').title())
+    message1 = "Archiving..."
+    if b_type == 'no_data':
+        exclude_dirs.extend(['Thumbnails', 'Databases'])
+        exclude_files.extend(["Textures13.db"])
+    check_path()
+    if not os.path.exists(zip_path):
+        os.makedirs(zip_path)
+    title = set_name()
+    if not title:
+        return
+    destfile = xbmc.translatePath(os.path.join(zip_path, str(title) + '.zip'))
+    if os.path.exists(destfile):
+        if not dialog.yesno('File Name Already Exists', 'Would You like to Create Another File',
+                            'Or Overwrite The Existing File?', '', 'Overwrite File', 'Create Another'):
+            os.remove(destfile)
+        else:
+            title = set_name()
+            if not title:
+                return False, 0
+            destfile = xbmc.translatePath(os.path.join(zip_path, str(title) + '.zip'))
+    zipobj = zipfile.ZipFile(destfile, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
+    rootlen = len(home_path)
     for_progress = []
     item = []
-    dp.create(message_header, message1, message2, message3)
-    for base, dirs, files in os.walk(sourcefile):
+    dp.create(message_header, message1, '', '')
+    for base, dirs, files in os.walk(home_path):
         for n_file in files:
             item.append(n_file)
     n_item = len(item)
-    for base, dirs, files in os.walk(sourcefile):
+    for base, dirs, files in os.walk(home_path):
         dirs[:] = [d for d in dirs if d not in exclude_dirs]
         files[:] = [f for f in files if f not in exclude_files]
         for file_n in files:
@@ -153,145 +124,47 @@ def archive_cb(sourcefile, message_header, message1, message2, message3, exclude
 # ################  Restore  ####################################
 
 def restore():
-    for zip_file in os.listdir(zip_path):
-        if zip_file.endswith(".zip"):
-            url = xbmc.translatePath(os.path.join(zip_path, zip_file))
-            kodi.addItem(zip_file, url, 'read_zip', '', '', '')
+    if zip_path != 'Click Here':
+        for zip_file in os.listdir(zip_path):
+            if zip_file.endswith(".zip"):
+                url = xbmc.translatePath(os.path.join(zip_path, zip_file))
+                kodi.addItem(zip_file, url, 'read_zip', '', '', '')
 
 
 def read_zip(url):
-    if not dialog.yesno(AddonTitle, "[COLOR smokewhite]" + url + "[/COLOR]", "Do you want to restore this backup?"):
+    if not dialog.yesno(AddonTitle, "[COLOR smokewhite]" + url + "[/COLOR]", "Do you want to restore this backup?",
+                        os.path.basename(url)):
         sys.exit(1)
-    # wipe_backup_restore()
+    dp.create(AddonTitle, "Restoring Kodi.", 'In Progress.............', 'Please Wait')
+    #wipe_backup_restore()
     dp.create(AddonTitle, "Restoring File:", url, '')
-    unzip(url, home_path, dp)
-    dialog.ok(AddonTitle, "Installation Complete.", "", "Click OK to exit Kodi and then restart to complete .")
+    kodi.extract_all(url, home_path, dp)
+    dialog.ok(AddonTitle, "Installation Complete.", "", "Click OK to exit Kodi and then restart to complete.")
     xbmc.executebuiltin('ShutDown')
 
 
-def remove_paths(path):
-        try:
-            for root, dirs, files in os.walk(path, topdown=True):
-                dirs[:] = [d for d in dirs if d not in excludes_folder]
-                for name in files:
-                    try:
-                        os.unlink(os.path.join(root, name))
-                    except Exception as e:
-                        kodi.log(str(e))
-                for name in dirs:
-                    try:
-                        os.rmdir(os.path.join(root, name))
-                        os.rmdir(root)
-                    except Exception as e:
-                        kodi.log(str(e))
-        except:
-            traceback.print_exc(file=sys.stdout)
-
-
 def wipe_backup_restore():
-    dp.create(AddonTitle, "Restoring Kodi.", 'In Progress.............', 'Please Wait')
-    try:
-        for root, dirs, files in os.walk(home_path, topdown=True):
-            dirs[:] = [d for d in dirs if d not in excludes_folder]
-            for name in files:
-                try:
-                    os.remove(os.path.join(root, name))
-                    os.rmdir(os.path.join(root, name))
-                except:
-                    pass
-
-            for name in dirs:
-                try:
-                    os.rmdir(os.path.join(root, name)); os.rmdir(root)
-                except:
-                    pass
-    except:
-        pass
-
+    dir_exclude = ('addons', 'temp')
+    sub_dir_exclude = [addon_id]
+    file_exclude = [logfile_name + '.log']
     dp.create(AddonTitle, "Cleaning Install", 'Removing old folders.', 'Please Wait')
-    REMOVE_EMPTY_FOLDERS()
-    REMOVE_EMPTY_FOLDERS()
-    REMOVE_EMPTY_FOLDERS()
-    REMOVE_EMPTY_FOLDERS()
-    REMOVE_EMPTY_FOLDERS()
-    REMOVE_EMPTY_FOLDERS()
-    REMOVE_EMPTY_FOLDERS()
-    if os.path.exists(databases_path):
-        try:
-            for root, dirs, files in os.walk(databases_path, topdown=True):
-                dirs[:] = [d for d in dirs]
-                for name in files:
-                    try:
-                        os.remove(os.path.join(root, name))
-                        os.rmdir(os.path.join(root, name))
-                    except:
-                        pass
-
-                for name in dirs:
-                    try:
-                        os.rmdir(os.path.join(root, name)); os.rmdir(root)
-                    except:
-                        pass
-        except:
-            pass
-
-    if os.path.exists(addon_data_path):
-        try:
-            for root, dirs, files in os.walk(addon_data_path, topdown=True):
-                dirs[:] = [d for d in dirs]
-                for name in files:
-                    try:
-                        os.remove(os.path.join(root, name))
-                        os.rmdir(os.path.join(root, name))
-                    except:
-                        pass
-
-                for name in dirs:
-                    try:
-                        os.rmdir(os.path.join(root, name)); os.rmdir(root)
-                    except:
-                        pass
-        except:
-            pass
-
-
-def REMOVE_EMPTY_FOLDERS():
-    # initialize the counters
-    empty_count = 0
-    used_count = 0
-    try:
-        for curdir, subdirs, files in os.walk(home_path):
-            if len(subdirs) == 0 and len(files) == 0:  # check for empty directories. len(files) == 0 may be overkill
-                empty_count += 1  # increment empty_count
-                os.rmdir(curdir)  # delete the directory
-                # kodi.log("Successfully Removed: "+curdir)
-            elif len(subdirs) > 0 and len(files) > 0:  # check for used directories
-                used_count += 1  # increment
-    except:
-        pass
-
-
-def unzip(_in, _out, dp):
-    zin = zipfile.ZipFile(_in, 'r')
-    nFiles = float(len(zin.infolist()))
-    count = 0
-    try:
-        for item in zin.infolist():
-            count += 1
-            update = count / nFiles * 100
-            dp.update(int(update), '', '', '[COLOR dodgerblue][B]' + str(item.filename) + '[/B][/COLOR]')
+    for (root, dirs, files) in os.walk(home_path, topdown=True):
+        dirs[:] = [d for d in dirs if d not in sub_dir_exclude]
+        files[:] = [file for file in files if file not in file_exclude]
+        for folder in dirs:
             try:
-                zin.extract(item, _out)
-            except Exception as e:
-                print(str(e))
-    except Exception as e:
-        print(str(e))
-        return False
-    return True
-
+                if folder not in dir_exclude:
+                    shutil.rmtree(os.path.join(root, folder))
+            except:
+                pass
+        for file_name in files:
+            try:
+                os.remove(os.path.join(root, file_name))
+            except:
+                pass
+        
 
 def ListBackDel():
-    addonfolder = xbmc.translatePath(os.path.join('special://', 'home'))
     for file in os.listdir(zip_path):
         if file.endswith(".zip"):
             url = xbmc.translatePath(os.path.join(zip_path, file))
@@ -299,7 +172,8 @@ def ListBackDel():
 
 
 def DeleteBackup(url):
-    if dialog.yesno(AddonTitle, "[COLOR smokewhite]" + url + "[/COLOR]", "Do you want to delete this backup?"):
+    if dialog.yesno(AddonTitle, "[COLOR smokewhite]" + url + "[/COLOR]", "Do you want to delete this backup?",
+                    os.path.basename(url)):
         os.remove(url)
         dialog.ok(AddonTitle, "[COLOR smokewhite]" + url + "[/COLOR]", "Successfully deleted.")
 

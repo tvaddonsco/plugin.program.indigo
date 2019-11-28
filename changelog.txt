@@ -1,8 +1,16 @@
+V4.0.14 
+- Kodi 18 Python-2/3 cross compatibility
+- Code Cleanup for Backup/Restore
+- Auto-Hide Addon Installer sections when API is down
+
 V4.0.13
 - Temporary removal of broken sections
 
 V4.0.12
-- Fixed Kodi 18 compatibility issues
+- Fixed compatibility issues
+
+V4.0.11
+- Fixed for issue with kodi 18 armV7 on first run/clean install
 
 V4.0.10
 - Fixed Sports Listing guide due to a site change

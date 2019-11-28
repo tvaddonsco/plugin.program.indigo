@@ -41,7 +41,7 @@ class Viewer(xbmcgui.WindowXML):
     mouse_controls = 4300
 
     def __init__(self, xml_name, fallback_path, skin_folder):
-        super(Viewer, self).__init__(self, xml_name, fallback_path, skin_folder)
+        super(Viewer,self).__init__()
         self.page_up = 5
         self.page_down = 6
         self.previous_menu = 10
@@ -250,15 +250,15 @@ def text_view(t_path='', t_contents='', d_path=''):
             # Open and read the file from path location
             try:
                 with open(t_path, 'rb') as temp_file:
-                    t_contents = temp_file.read()
+                    t_contents = temp_file.read().decode('utf-8')
             except IOError:
                 t_contents = 'Could not read the file'
     if not t_contents:
         t_contents = 'The file was empty'
     # Set contents for text display function
-    t_contents = t_contents.replace(' ERROR: ', ' [COLOR red]ERROR[/COLOR]: ') \
+    tr_contents = t_contents.replace(' ERROR: ', ' [COLOR red]ERROR[/COLOR]: ') \
         .replace(' WARNING: ', ' [COLOR gold]WARNING[/COLOR]: ')
-    return t_path, t_contents
+    return t_path, tr_contents
 
 
 def window():

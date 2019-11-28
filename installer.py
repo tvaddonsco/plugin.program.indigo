@@ -15,13 +15,21 @@ import xbmcaddon
 import xbmcgui
 import xbmcplugin
 import traceback
-from itertools import izip_longest
 
 from libs import addon_able
 from libs import aiapi
 from libs import kodi
 from libs import viewsetter
 
+try:
+    from itertools import izip_longest
+except:
+    from itertools import zip_longest as izip_longest
+
+try:
+    quote_plus = urllib.quote_plus
+except:
+    quote_plus = urllib.parse.quote_plus
 
 # if kodi.get_kversion() > 16.5:
 #     ssl._create_default_https_context = ssl._create_unverified_context
@@ -35,6 +43,7 @@ addon = (addon_id, sys.argv)
 settings = xbmcaddon.Addon(id=addon_id)
 ADDON = xbmcaddon.Addon(id=addon_id)
 artPath = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id, 'resources', 'art2/'))
+artwork1 = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id, 'art/'))
 artwork = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id, 'art2/'))
 mainPath = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id))
 fanart = xbmc.translatePath(os.path.join(mainPath, 'fanart.jpg'))
@@ -46,7 +55,8 @@ dialog = xbmcgui.Dialog()
 Keymaps_URL = 'http://indigo.tvaddons.co/keymaps/customkeys.txt'
 KEYBOARD_FILE = xbmc.translatePath(os.path.join('special://home/userdata/keymaps/', 'keyboard.xml'))
 openSub = "https://github.com/tvaddonsco/tva-release-repo/raw/master/service.subtitles.opensubtitles_by_opensubtitles/"
-burst_url = "http://burst.surge.sh/release/script.quasar.burst-0.6.0.zip"
+burst_url = "http://burst.surge.sh/release/script.quasar.burst-0.5.8.zip"
+# tvpath = "https://oldgit.com/tvaresolvers/tva-common-repository/raw/master/zips/"
 tvpath = "https://github.com/tvaddonsco/tva-resolvers-repo/raw/master/zips"
 tva_repo = 'https://github.com/tvaddonsco/tva-release-repo/tree/master/'
 kodi_url = "http://mirrors.kodi.tv/addons/" + kodi.get_codename().lower() + '/'
@@ -94,43 +104,50 @@ def MAININDEX():
     xbmc.executebuiltin("UpdateAddonRepos")
     kodi.addItem("Git Browser", '', 'github_main', artwork + 'github_browser.png',
                  description="Search for repositories hosted on GitHub.")
-    #kodi.addDir('Search by: Addon/Author', '', 'searchaddon', artwork + 'search.png',
-    #            description="Search for addons by Name or Author")
-    if settings.getSetting('featured') == 'true':
-        kodi.addDir('Featured Addons', 'featured', 'addonlist', artwork + 'featured.png',
-                    description="The most popular Kodi addons!")
-    # if settings.getSetting('livetv') == 'true':
-    #     kodi.addDir('Live TV Addons', 'live', 'addonlist', artwork + 'livetv.png',
-    #                 description="The most popular live TV addons!")
-    # if settings.getSetting('sports') == 'true':
-    #     kodi.addDir('Sports Addons', 'sports', 'addonlist', artwork + 'sports.png',
-    #                 description="The most popular sports addons!")
-    if settings.getSetting('video') == 'true':
-        kodi.addDir('Video Addons', 'video', 'addonlist', artwork + 'video.png',
-                    description="Every video addon in existence!")
-    if settings.getSetting('audio') == 'true':
-        kodi.addDir('Audio Addons', 'audio', 'addonlist', artwork + 'audio.png',
-                    description="Find addons to listen to music!")
-    if settings.getSetting('program') == 'true':
-        kodi.addDir('Program Addons', 'executable', 'addonlist', artwork + 'program.png',
-                    description="Every program addon you can imagine!")
-    # if settings.getSetting('playlist') == 'true':
-    #     kodi.addDir('Playlist Addons', 'playlists', 'addonlist', artwork + 'playlists.png',
-    #                 description="The most popular playlist addons!")
-    if settings.getSetting('services') == 'true':
-        kodi.addDir('Service Addons', 'service', 'addonlist', artwork + 'service.png')
-    if settings.getSetting('skincat') == 'true':
-        kodi.addDir('Kodi Skins', 'skins', 'addonlist', artwork + 'kodi_skins.png',
-                    description="Change up your look!")
-    if settings.getSetting('world') == 'true':
-        kodi.addDir('International Addons', 'international', 'interlist', artwork + 'world.png',
-                    description="Foreign language addons and repos from across the globe!")
-    if settings.getSetting('adult') == 'true':
-        kodi.addDir('Adult Addons', 'xxx', 'adultlist', artwork + 'adult.png',
-                    description="Must be 18 years or older! This menu can be disabled from within Add-on Settings.")
-    # if settings.getSetting('repositories') == 'true':
-    # 	kodi.addDir('Repositories','repositories', 'addonlist', artwork + 'repositories.png',
-    # 				description="Browse addons by repository!")
+    try:
+        if len(str(api.get_all_addons())) < 20:
+            raise ValueError('API is less than 20')
+        kodi.addDir('Search by: Addon/Author', '', 'searchaddon', artwork + 'search.png',
+                    description="Search for addons by Name or Author")
+        if settings.getSetting('featured') == 'true':
+            kodi.addDir('Featured Addons', 'featured', 'addonlist', artwork + 'featured.png',
+                        description="The most popular Kodi addons!")
+        # if settings.getSetting('livetv') == 'true':
+        #     kodi.addDir('Live TV Addons', 'live', 'addonlist', artwork + 'livetv.png',
+        #                 description="The most popular live TV addons!")
+        # if settings.getSetting('sports') == 'true':
+        #     kodi.addDir('Sports Addons', 'sports', 'addonlist', artwork + 'sports.png',
+        #                 description="The most popular sports addons!")
+        if settings.getSetting('video') == 'true':
+            kodi.addDir('Video Addons', 'video', 'addonlist', artwork + 'video.png',
+                        description="Every video addon in existence!")
+        if settings.getSetting('audio') == 'true':
+            kodi.addDir('Audio Addons', 'audio', 'addonlist', artwork + 'audio.png',
+                        description="Find addons to listen to music!")
+        if settings.getSetting('program') == 'true':
+            kodi.addDir('Program Addons', 'executable', 'addonlist', artwork + 'program.png',
+                        description="Every program addon you can imagine!")
+        # if settings.getSetting('playlist') == 'true':
+        #     kodi.addDir('Playlist Addons', 'playlists', 'addonlist', artwork + 'playlists.png',
+        #                 description="The most popular playlist addons!")
+        if settings.getSetting('services') == 'true':
+            kodi.addDir('Service Addons', 'service', 'addonlist', artwork + 'service.png')
+        if settings.getSetting('skincat') == 'true':
+            kodi.addDir('Kodi Skins', 'skins', 'addonlist', artwork + 'kodi_skins.png',
+                        description="Change up your look!")
+        if settings.getSetting('world') == 'true':
+            kodi.addDir('International Addons', 'international', 'interlist', artwork + 'world.png',
+                        description="Foreign language addons and repos from across the globe!")
+        if settings.getSetting('adult') == 'true':
+            kodi.addDir('Adult Addons', 'xxx', 'adultlist', artwork + 'adult.png',
+                        description="Must be 18 years or older! This menu can be disabled from within Add-on Settings.")
+        # if settings.getSetting('repositories') == 'true':
+        # 	kodi.addDir('Repositories','repositories', 'addonlist', artwork + 'repositories.png',
+        # 				description="Browse addons by repository!")
+    except:
+        traceback.print_exc(file=sys.stdout)
+        kodi.addItem("Addon Listing Is Temporarily Unavailable", '', '', artwork1 + 'addon_installer.png',
+                    description="The Addon Listing Is Temporarily Unavailable")
     # kodi.addItem('Enable Live Streaming', 'None', 'EnableRTMP', artwork + 'enablertmp.png',
     # 			 description="Enable RTMP InputStream and InputStream Adaptive modules for Live Streaming.")
     kodi.addItem('Official OpenSubtitles Addon', openSub, 'addopensub', artwork + 'opensubicon.png',
@@ -153,7 +170,8 @@ def SEARCHADDON(url):  # Start Search Function
     vq = _get_keyboard(heading="Search add-ons")
     if not vq:
         return False, 0
-    title = urllib.quote_plus(vq)
+    title = quote_plus(vq)
+    title = urllib.parse.quote_plus(vq)
     Get_search_results(title)
 
 
@@ -532,7 +550,7 @@ def set_content(content):
 
 # HELPDIR**************************************************************
 def addDir(name, url, mode, thumb):
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(name)
+    u = sys.argv[0] + "?url=" + quote_plus(url) + "&mode=" + str(mode) + "&name=" + quote_plus(name)
     # ok = True
     liz = xbmcgui.ListItem(name, iconImage=iconart, thumbnailImage=thumb)
     # liz.setInfo(type="Video",infoLabels={"title":name,"Plot":description})
@@ -546,11 +564,11 @@ def addDir(name, url, mode, thumb):
 
 def addHELPDir(name, url, mode, iconimage, fanart, description, filetype, repourl, version, author, contextmenuitems=[],
                contextreplace=False):
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(
-        name) + "&iconimage=" + urllib.quote_plus(iconimage) + "&fanart=" + urllib.quote_plus(
-        fanart) + "&description=" + urllib.quote_plus(description) + "&filetype=" + urllib.quote_plus(
-        filetype) + "&repourl=" + urllib.quote_plus(repourl) + "&author=" + urllib.quote_plus(
-        author) + "&version=" + urllib.quote_plus(version)
+    u = sys.argv[0] + "?url=" + quote_plus(url) + "&mode=" + str(mode) + "&name=" + quote_plus(
+        name) + "&iconimage=" + quote_plus(iconimage) + "&fanart=" + quote_plus(
+        fanart) + "&description=" + quote_plus(description) + "&filetype=" + quote_plus(
+        filetype) + "&repourl=" + quote_plus(repourl) + "&author=" + quote_plus(
+        author) + "&version=" + quote_plus(version)
     # ok = True
     liz = xbmcgui.ListItem(name, iconImage=iconart, thumbnailImage=iconimage)  # "DefaultFolder.png"
     # if len(contextmenuitems) > 0:
@@ -566,9 +584,9 @@ def addHELPDir(name, url, mode, iconimage, fanart, description, filetype, repour
 
 
 def add2HELPDir(name, url, mode, iconimage, fanart, description, filetype, contextmenuitems=[], contextreplace=False):
-    u = sys.argv[0] + "?url=" + urllib.quote_plus(url) + "&mode=" + str(mode) + "&name=" + urllib.quote_plus(
-        name) + "&iconimage=" + urllib.quote_plus(iconimage) + "&fanart=" + urllib.quote_plus(
-        fanart) + "&description=" + urllib.quote_plus(description) + "&filetype=" + urllib.quote_plus(filetype)
+    u = sys.argv[0] + "?url=" + quote_plus(url) + "&mode=" + str(mode) + "&name=" + quote_plus(
+        name) + "&iconimage=" + quote_plus(iconimage) + "&fanart=" + quote_plus(
+        fanart) + "&description=" + quote_plus(description) + "&filetype=" + quote_plus(filetype)
     # ok = True
     liz = xbmcgui.ListItem(name, iconImage=iconart, thumbnailImage=iconimage)
     # if len(contextmenuitems) > 0:
@@ -1014,7 +1032,10 @@ def download(url, dest, addonfolder, name):
     dp = xbmcgui.DialogProgress()
     dp.create("Downloading: " + name)
     dp.update(0, "Downloading: " + name, '', 'Please Wait')
-    urllib.urlretrieve(url, dest, lambda nb, bs, fs, url=url: _pbhook(nb, bs, fs, url, dp))
+    try:
+        urllib.urlretrieve(url, dest, lambda nb, bs, fs: _pbhook(nb, bs, fs, '', dp))
+    except:
+        urllib.request.urlretrieve(url, dest, lambda nb, bs, fs: _pbhook(nb, bs, fs, '', dp))
     kodi.log("DOWNLOAD IS DONE  " + name)
     extract.all(dest, addonfolder, dp=None)
 
@@ -1026,7 +1047,7 @@ def _pbhook(numblocks, blocksize, filesize, url, dp):
     except Exception as e:
         kodi.log(str(e))
         percent = 100
-    dp.update(percent)
+    dp.update(int(percent))
     if dp.iscanceled():
         dp.close()
         raise Exception("Canceled")

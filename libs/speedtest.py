@@ -36,7 +36,8 @@ def download(url, dest, dp=None):
     try:
         urllib.urlretrieve(url, dest, lambda nb, bs, fs: _pbhook(nb, bs, fs, dp, start_time))
     except:
-        pass
+        urllib.request.urlretrieve(url, dest, lambda nb, bs, fs: _pbhook(nb, bs, fs, dp, start_time))
+
     return time.time() - start_time
 
 
