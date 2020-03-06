@@ -187,36 +187,37 @@ def what_sports():
     kodi.addItem('[COLOR blue][B]US Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
                  description='[COLOR gold]Sports from around the US[/COLOR]')
     link = kodi.read_file('https://www.tvguide.com/sports/live-today/')
-    pattern = '(?s)program-link">([^<]*)<.+?info">([^\|]*)\| ([^<]*)<.+?description">([^<]*)'
-    for m_name, m_time, m_channel, m_description in re.findall(pattern, link):
-        kodi.addItem('[COLOR white][B]%s[/COLOR][/B] - [COLOR gold]%s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
-                     % (m_time.lower(), name_cleaner(m_name), m_channel), '', '', artwork + 'icon.png',
-                     description='[COLOR gold][B]%s - %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
-                                 % (m_description, name_cleaner(m_name), m_time.lower(), m_channel))
+    match1 = re.search('(?s)"button-picker-divider"(.+?</html>)', link)
+    if match1:
+        pattern = '(?s)title="([^"]*)".+?-link.+?item">([^<]*)<.+?item">([^<]*)<.+?font-base">([^<]*)<'
+        for m_name, m_time, m_channel, m_description in re.findall(pattern, match1.group(1)):
+            kodi.addItem('[COLOR white][B]%s[/COLOR][/B] - [COLOR gold]%s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
+                         % (m_time.lower(), name_cleaner(m_name), m_channel), '', '', artwork + 'icon.png',
+                         description='[COLOR gold][B]%s - %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
+                                     % (m_description, name_cleaner(m_name), m_time.lower(), m_channel))
 
     # #######  UK  ###############
     kodi.addItem('[COLOR blue][B]UK Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
                  description='[COLOR gold]Sports from around the UK[/COLOR]')
-    link = kodi.read_file('http://www.wheresthematch.com/').replace('\r', '').replace('\n', '').replace('\t', '')
-    pattern = '(?s)fixture-details">(.+?)t-details">(.+?)-name">(.+?)l-details">(.+?).png'
+    link = kodi.read_file('http://www.wheresthematch.com/')
+    pattern = '(?s)fixture-details">(.+?)t-details">(.+?)-name">(.+?)l-details">(.+?)</td>'
     for m_game, m_time, m_league, m_channels in re.findall(pattern, link):
-        g_time = re.search('<strong>([^<]*)', m_time)
-        g_time = g_time.group(1).strip('0').replace(' ', '') if g_time else ''
-        league = re.search('<span>([^<]*)', m_league)
-        g_league = ' - ' + league.group(1) if league else ''
+        g_time = re.search('<strong>([^<]*)<', m_time)
+        g_time = g_time.group(1).replace('00:', '12:').strip('0').replace(' ', '') if g_time else ''
+        g_league = re.search('<span>([^<]*)<', m_league)
+        g_league = g_league.group(1).rstrip() if g_league else ''
         g_name = ''
         for team1, team2 in re.findall('(?s).asp">[^>]*>([^<]+)<.+?asp.+?">([^<]*)', m_game):
-            g_name = '- %s vs %s' % (team1, team2) if m_game else ''
-        if '<strong class=' in m_game:
-            game = re.search('<strong class="">([^<]*)', m_game)
-            g_name = ' - ' + game.group(1) if game and league != game.group(1) else ''
+            g_name = '%s vs %s' % (team1.strip(), team2.strip()) if m_game else ''
         channels = ''
-        for channel in re.findall('-name">([^<]*)', m_channels):
-            channels += ' ' + channel if not channels else ', ' + channel
-        kodi.addItem('[COLOR white][B]%s[/COLOR][/B][COLOR gold]%s %s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
+        for channel in re.findall('title=".+?on ([^"]*)"', m_channels):
+            for chan in ('&', 'tv app', 'sky'):
+                channel = channel.replace('on ', '') if chan.lower() not in channel.lower() else ''
+            channels += '' + channel if not channels else ', ' + channel if channel else ''
+        kodi.addItem('[COLOR white][B]%s[/COLOR][/B] - [COLOR gold]%s - %s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
                      % (g_time, g_league, g_name, channels), '', '', artwork + 'icon.png',
-                     description='[COLOR gold][B]%s - %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
-                                 % (g_time, g_name, g_league, channels))
+                     description='[COLOR gold][B]%s - %s[/COLOR][/B] - [COLOR white]%s | %s[/COLOR]'
+                                 % (g_name, g_league, g_time, channels))
     viewsetter.set_view("tvshows")
 
 
@@ -334,14 +335,14 @@ def fullspeedtest():
     try:
         # link = OPEN_URL(speed_test)
         link = kodi.read_file(speed_test)
-        match = re.findall('href="([^"]*)".+src="([^"]*)".+\n.+?(\d+\s[^b]*b)', link)
+        match = re.findall('href="([^"]*)".+src="([^"]*)"[^\d]*(\d+\s[^b]*b)', link)
         for m_url, m_iconimage, m_name in reversed(match):
             m_iconimage = artwork + str(m_name).replace(' ', '').lower() + '.png'
             if 'mb'in m_iconimage and not os.path.isfile(m_iconimage):
                 m_iconimage = m_iconimage.replace('mb', '')
-
-            kodi.addItem('[COLOR ghostwhite]' + m_name + '[/COLOR]', m_url, "runtest", m_iconimage,
-                         description='Test with a ' + m_name + ' file')
+            if m_name not in ('10 Gb'):
+                kodi.addItem('[COLOR ghostwhite]' + m_name + '[/COLOR]', m_url, "runtest", m_iconimage,
+                             description='Test with a ' + m_name + ' file')
     except Exception as e:
         kodi.log(str(e))
         import traceback

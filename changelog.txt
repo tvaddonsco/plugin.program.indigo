@@ -1,3 +1,8 @@
+V4.0.17
+- Fixed Sports Listing guide due to a site change
+- Fixed Speed test due to a site change
+- Fixed Malicious Script Blocker due to Kodi change
+
 V4.0.16
 - Version Bump to Fix Disabling
 
