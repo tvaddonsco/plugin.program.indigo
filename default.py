@@ -5,6 +5,7 @@ import re
 import shutil
 import sys
 import urllib
+import traceback
 
 import configwizard
 import textviewer
@@ -88,16 +89,15 @@ def main_menu():
             dp.update(0)
             icons_zip = os.path.join(packagepath, AddonTitle + '_icons.zip')
             downloader.download(kodi.read_file('http://indigo.tvaddons.co/graphics/arts.txt'), icons_zip, dp)
-            # downloader.download(OPEN_URL('http://indigo.tvaddons.co/graphics/arts.txt'), icons_zip, dp)
             dp.update(0, 'Getting %s Ready........' % AddonTitle, 'Extracting %s Icons......' % AddonTitle)
-            extract.all(icons_zip, addon_path, dp)
+            extract.extract_all(icons_zip, addon_path, dp)
             dp.close()
     except Exception as e:
         kodi.log(str(e))
     # Check for old version of hubrepo and remove it
     try:
         if os.path.exists(hubpath):
-            with open(hubpath, 'r') as content:
+            with open(hubpath + '/addon.xml', 'r') as content:
                 if 'AG' in content:
                     shutil.rmtree(hubpath)
     except Exception as e:
@@ -105,25 +105,20 @@ def main_menu():
     # # Check for HUBRepo and install it
     try:
         if not os.path.exists(hubpath):
-            installer.HUBINSTALL('repository.xbmchub', 'http://github.com/tvaddonsco/tva-release-repo/raw/master/'
-                                                       'repository.xbmchub/', 'repository.xbmchub')
+            installer.hub_install('repository.xbmchub', 'http://github.com/tvaddonsco/tva-release-repo/raw/master/'
+                                                        'repository.xbmchub/')
             # xbmc.executebuiltin("XBMC.InstallAddon(%s)" % 'repository.xbmchub')
             addon_able.set_enabled("repository.xbmchub")
-            xbmc.executebuiltin("XBMC.UpdateAddonRepos()")
     except Exception as e:
         kodi.log(str(e))
-        import traceback
         traceback.print_exc(file=sys.stdout)
         raise
     # Check for Log Uploader and install it
     try:
         if not os.path.exists(uploaderpath):
-            installer.HUBINSTALL('script.tvaddons.debug.log',
-                                 'http://github.com/tvaddonsco/tva-release-repo/raw/master'
-                                 '/script.tvaddons.debug.log/', 'script.tvaddons.debug.log')
+            installer.hub_install('script.tvaddons.debug.log', 'http://github.com/tvaddonsco/tva-release-repo/raw/'
+                                                               'master/script.tvaddons.debug.log/')
             addon_able.set_enabled('script.tvaddons.debug.log')
-            # xbmc.executebuiltin("InstallAddon(%s)" % 'script.tvaddons.debug.log')
-            xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
     except Exception as e:
         kodi.log(str(e))
         raise
@@ -145,36 +140,36 @@ def main_menu():
         note_description = 'Subscribe'
 
     if kodi.get_setting('wizardran') == 'false':
-        kodi.addItem("Config Wizard", '', 'call_wizard', artwork+'config_wizard.png',
-                     description="Automatically configure Kodi with the best addons and goodies in seconds!")
-    kodi.addDir("Addon Installer", '', 'call_installer', artwork + 'addon_installer.png',
-                description="It’s like an App Store for Kodi addons!")
-    kodi.addDir("Maintenance Tools", '', 'call_maintool', artwork + 'maintool.png',
-                description="Keep your Kodi setup running at optimum performance!")
-    # kodi.addDir("Kodi Librtmp Files", '', 'get_libs', artwork +'librtmp_files.png')
-    kodi.addItem("Rejuvenate Kodi", '', 'call_rejuv', artwork + 'rejuvinate.png',
-                 description="Wipe and reconfigure Kodi with the latest Config Wizard setup!")
-    kodi.addDir("Factory Restore", '', 'call_restore', artwork + 'factory_restore.png',
-                description="Start off fresh, wipe your Kodi setup clean!")
+        kodi.add_item("Config Wizard", '', 'call_wizard', artwork+'config_wizard.png',
+                      description="Automatically configure Kodi with the best addons and goodies in seconds!")
+    kodi.add_dir("Addon Installer", '', 'call_installer', artwork + 'addon_installer.png',
+                 description="It’s like an App Store for Kodi addons!")
+    kodi.add_dir("Maintenance Tools", '', 'call_maintool', artwork + 'maintool.png',
+                 description="Keep your Kodi setup running at optimum performance!")
+    # kodi.add_dir("Kodi Librtmp Files", '', 'get_libs', artwork +'librtmp_files.png')
+    kodi.add_item("Rejuvenate Kodi", '', 'call_rejuv', artwork + 'rejuvinate.png',
+                  description="Wipe and reconfigure Kodi with the latest Config Wizard setup!")
+    kodi.add_dir("Factory Restore", '', 'call_restore', artwork + 'factory_restore.png',
+                 description="Start off fresh, wipe your Kodi setup clean!")
     if os.path.exists(uploaderpath):
-        kodi.addItem("Log Uploader", '', 'log_upload', artwork + 'log_uploader.png',
-                     description="Easily upload your error logs for troubleshooting!")
-    kodi.addDir("Network Speed Test", '', 'runspeedtest', artwork + 'speed_test.png',
-                description="How fast is your internet?")
-    kodi.addDir("System Information", '', 'system_info', artwork + 'system_info.png',
-                description="Useful information about your Kodi setup!")
-    kodi.addDir("Sports Listings", '', 'call_sports', artwork + 'sports_list.png',
-                description="Who’s playing what today?")
-    kodi.addDir('Backup / Restore', '', 'backup_restore', artwork + 'backup_restore.png',
-                description="Backup or restore your Kodi configuration in minutes!")
-    kodi.addItem("Log Viewer", '', 'log_view', artwork + 'log_viewer.png',
-                 description="Easily view your error log without leaving Kodi!")
-    kodi.addItem("No-Coin Scan", '', 'nocoin', artwork + 'no_coin.png',
-                 description="Scan your Kodi directory for coin mining.")
-    kodi.addItem("Notifications " + note_status, '', 'toggle_notify', artwork + note_art,
-                 description="%s to important TV ADDONS notifications on startup!" % note_description)
-    kodi.addItem("Show Notification", '', 'show_note', artwork + 'notification.png',
-                 description="Show TVA Notification. To get Important News, Tips, and Giveaways from TV ADDONS")
+        kodi.add_item("Log Uploader", '', 'log_upload', artwork + 'log_uploader.png',
+                      description="Easily upload your error logs for troubleshooting!")
+    kodi.add_dir("Network Speed Test", '', 'runspeedtest', artwork + 'speed_test.png',
+                 description="How fast is your internet?")
+    kodi.add_dir("System Information", '', 'system_info', artwork + 'system_info.png',
+                 description="Useful information about your Kodi setup!")
+    kodi.add_dir("Sports Listings", '', 'call_sports', artwork + 'sports_list.png',
+                 description="Who’s playing what today?")
+    kodi.add_dir('Backup / Restore', '', 'backup_restore', artwork + 'backup_restore.png',
+                 description="Backup or restore your Kodi configuration in minutes!")
+    kodi.add_item("Log Viewer", '', 'log_view', artwork + 'log_viewer.png',
+                  description="Easily view your error log without leaving Kodi!")
+    kodi.add_item("No-Coin Scan", '', 'nocoin', artwork + 'no_coin.png',
+                  description="Scan your Kodi directory for coin mining.")
+    kodi.add_item("Notifications " + note_status, '', 'toggle_notify', artwork + note_art,
+                  description="%s to important TV ADDONS notifications on startup!" % note_description)
+    kodi.add_item("Show Notification", '', 'show_note', artwork + 'notification.png',
+                  description="Show TVA Notification. To get Important News, Tips, and Giveaways from TV ADDONS")
     viewsetter.set_view("sets")
 
 
@@ -184,21 +179,21 @@ def do_log_uploader():
 
 def what_sports():
     # #######  AMERICAN  ###############
-    kodi.addItem('[COLOR blue][B]US Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
-                 description='[COLOR gold]Sports from around the US[/COLOR]')
+    kodi.add_item('[COLOR blue][B]US Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
+                  description='[COLOR gold]Sports from around the US[/COLOR]')
     link = kodi.read_file('https://www.tvguide.com/sports/live-today/')
     match1 = re.search('(?s)"button-picker-divider"(.+?</html>)', link)
     if match1:
         pattern = '(?s)title="([^"]*)".+?-link.+?item">([^<]*)<.+?item">([^<]*)<.+?font-base">([^<]*)<'
         for m_name, m_time, m_channel, m_description in re.findall(pattern, match1.group(1)):
-            kodi.addItem('[COLOR white][B]%s[/COLOR][/B] - [COLOR gold]%s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
-                         % (m_time.lower(), name_cleaner(m_name), m_channel), '', '', artwork + 'icon.png',
-                         description='[COLOR gold][B]%s - %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
-                                     % (m_description, name_cleaner(m_name), m_time.lower(), m_channel))
+            kodi.add_item('[COLOR white][B]%s[/COLOR][/B] - [COLOR gold]%s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
+                          % (m_time.lower(), name_cleaner(m_name), m_channel), '', '', artwork + 'icon.png',
+                          description='[COLOR gold][B]%s - %s[/COLOR][/B][COLOR white] - %s | %s[/COLOR]'
+                                      % (m_description, name_cleaner(m_name), m_time.lower(), m_channel))
 
     # #######  UK  ###############
-    kodi.addItem('[COLOR blue][B]UK Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
-                 description='[COLOR gold]Sports from around the UK[/COLOR]')
+    kodi.add_item('[COLOR blue][B]UK Sports[/COLOR][/B]', '', '', artwork + 'icon.png',
+                  description='[COLOR gold]Sports from around the UK[/COLOR]')
     link = kodi.read_file('http://www.wheresthematch.com/')
     pattern = '(?s)fixture-details">(.+?)t-details">(.+?)-name">(.+?)l-details">(.+?)</td>'
     for m_game, m_time, m_league, m_channels in re.findall(pattern, link):
@@ -214,10 +209,10 @@ def what_sports():
             for chan in ('&', 'tv app', 'sky'):
                 channel = channel.replace('on ', '') if chan.lower() not in channel.lower() else ''
             channels += '' + channel if not channels else ', ' + channel if channel else ''
-        kodi.addItem('[COLOR white][B]%s[/COLOR][/B] - [COLOR gold]%s - %s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
-                     % (g_time, g_league, g_name, channels), '', '', artwork + 'icon.png',
-                     description='[COLOR gold][B]%s - %s[/COLOR][/B] - [COLOR white]%s | %s[/COLOR]'
-                                 % (g_name, g_league, g_time, channels))
+        kodi.add_item('[COLOR white][B]%s[/COLOR][/B] - [COLOR gold]%s - %s[/COLOR][COLOR white][B] | %s[/COLOR][/B]'
+                      % (g_time, g_league, g_name, channels), '', '', artwork + 'icon.png',
+                      description='[COLOR gold][B]%s - %s[/COLOR][/B] - [COLOR white]%s | %s[/COLOR]'
+                                  % (g_name, g_league, g_time, channels))
     viewsetter.set_view("tvshows")
 
 
@@ -228,14 +223,14 @@ def rtmp_lib():
         link = kodi.read_file(liblist).replace('\n', '').replace('\r', '')
     except Exception as e:
         kodi.log(str(e))
-        kodi.addItem('[COLOR gold][B]This service is currently unavailable.[/COLOR][/B]', '', 100, '', '', '')
+        kodi.add_item('[COLOR gold][B]This service is currently unavailable.[/COLOR][/B]', '', 100, '', '', '')
         return
     match = re.compile('name="(.+?)".+?rl="(.+?)".+?ersion="(.+?)"').findall(link)
-    kodi.addItem('[COLOR gold][B]Files Will Be Donwloaded to the Kodi Home directory,'
-                 'You Will Need To Manually Install From There.[/COLOR][/B]', '', 100, '', '', '')
-    # kodi.addItem('[COLOR gold]---------------------------------------------------------[/COLOR]', '', 100, '',' ', '')
+    kodi.add_item('[COLOR gold][B]Files Will Be Donwloaded to the Kodi Home directory,'
+                  'You Will Need To Manually Install From There.[/COLOR][/B]', '', 100, '', '', '')
+    # kodi.add_item('[COLOR gold]--------------------------------------------------------[/COLOR]', '', 100, '',' ', '')
     for m_name, m_url, m_description in match:
-        kodi.addDir(m_name, m_url, "lib_installer", artwork + 'icon.png')
+        kodi.add_dir(m_name, m_url, "lib_installer", artwork + 'icon.png')
     viewsetter.set_view("sets")
 
 
@@ -255,7 +250,7 @@ def toggle_notify():
             kodi.set_setting('notifications-on-startup', "false")
         else:
             kodi.set_setting('notifications-on-startup', "true")
-        kodi.logInfo(status + "notifications")
+        kodi.log_info(status + "notifications")
         dialog = xbmcgui.Dialog()
         dialog.ok("Notifications " + status, "                     You have %ssubscribed to notifications!" % sub)
         xbmc.executebuiltin("Container.Refresh()")
@@ -290,42 +285,42 @@ def system_info():
             # link = OPEN_URL('http://whatismyip.network/')
             link = kodi.read_file('http://whatismyip.network/')
             ext_ip = ("blue", re.search('>My IP Address[^=]*[^>]*>([^<]*)', link).group(1))
-        except:
+        except TypeError:
             ext_ip = ("red", "IP Check Not Available")
 
     # Get Python Version
     pv = sys.version_info
     
     # System Information Menu
-    # kodi.addItem('[COLOR ghostwhite]Version: [/COLOR][COLOR lime] %s %s[/COLOR]' % (codename, versioni),
+    # kodi.add_item('[COLOR ghostwhite]Version: [/COLOR][COLOR lime] %s %s[/COLOR]' % (codename, versioni),
     #              '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]Version: [/COLOR][COLOR lime] %s %s[/COLOR]' %
-                 (kodi.get_codename(), xbmc.getInfoLabel("System.BuildVersion").split('Git')[0]),'',
-                 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]System Time: [/COLOR][COLOR lime] %s[/COLOR]' % systime,
-                 '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]Gateway: [/COLOR][COLOR blue] %s[/COLOR]' % gateway,
-                 '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]Local IP: [/COLOR][COLOR blue] %s[/COLOR]' % ipaddy,
-                 '', 100, artwork+'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]External IP: [/COLOR][COLOR %s] %s[/COLOR]' % ext_ip,
-                 '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]DNS 1: [/COLOR][COLOR blue] %s[/COLOR]' % dns1,
-                 '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]Network: [/COLOR][COLOR gold] %s[/COLOR]' % linkstate,
-                 '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]Version: [/COLOR][COLOR lime] %s %s[/COLOR]' %
+                  (kodi.get_codename(), xbmc.getInfoLabel("System.BuildVersion").split('Git')[0]), '',
+                  100, artwork + 'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]System Time: [/COLOR][COLOR lime] %s[/COLOR]' % systime,
+                  '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]Gateway: [/COLOR][COLOR blue] %s[/COLOR]' % gateway,
+                  '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]Local IP: [/COLOR][COLOR blue] %s[/COLOR]' % ipaddy,
+                  '', 100, artwork+'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]External IP: [/COLOR][COLOR %s] %s[/COLOR]' % ext_ip,
+                  '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]DNS 1: [/COLOR][COLOR blue] %s[/COLOR]' % dns1,
+                  '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]Network: [/COLOR][COLOR gold] %s[/COLOR]' % linkstate,
+                  '', 100, artwork + 'icon.png', "", description=" ")
     if str(totalspace) != '0 B':
-        kodi.addItem('[COLOR ghostwhite]Total Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % totalspace,
-                     '', 100, artwork + 'icon.png', "", description=" ")
+        kodi.add_item('[COLOR ghostwhite]Total Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % totalspace,
+                      '', 100, artwork + 'icon.png', "", description=" ")
     if str(freespace) != '0 B':
-        kodi.addItem('[COLOR ghostwhite]Free Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % freespace,
-                     '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]Free Memory: [/COLOR][COLOR gold] %s[/COLOR]' % freemem,
-                 '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]Resolution: [/COLOR][COLOR gold] %s[/COLOR]' % screenres,
-                 '', 100, artwork + 'icon.png', "", description=" ")
-    kodi.addItem('[COLOR ghostwhite]Python Version: [/COLOR][COLOR lime] %d.%d.%d[/COLOR]' % (pv[0], pv[1], pv[2]),
-                 '', 100, artwork + 'icon.png', "", description=" ")
+        kodi.add_item('[COLOR ghostwhite]Free Disc Space: [/COLOR][COLOR gold] %s[/COLOR]' % freespace,
+                      '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]Free Memory: [/COLOR][COLOR gold] %s[/COLOR]' % freemem,
+                  '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]Resolution: [/COLOR][COLOR gold] %s[/COLOR]' % screenres,
+                  '', 100, artwork + 'icon.png', "", description=" ")
+    kodi.add_item('[COLOR ghostwhite]Python Version: [/COLOR][COLOR lime] %d.%d.%d[/COLOR]' % (pv[0], pv[1], pv[2]),
+                  '', 100, artwork + 'icon.png', "", description=" ")
     viewsetter.set_view("files")
 
 
@@ -340,15 +335,15 @@ def fullspeedtest():
             m_iconimage = artwork + str(m_name).replace(' ', '').lower() + '.png'
             if 'mb'in m_iconimage and not os.path.isfile(m_iconimage):
                 m_iconimage = m_iconimage.replace('mb', '')
-            if m_name not in ('10 Gb'):
-                kodi.addItem('[COLOR ghostwhite]' + m_name + '[/COLOR]', m_url, "runtest", m_iconimage,
-                             description='Test with a ' + m_name + ' file')
+            if m_name not in '10 Gb':
+                kodi.add_item('[COLOR ghostwhite]' + m_name + '[/COLOR]', m_url, "runtest", m_iconimage,
+                              description='Test with a ' + m_name + ' file')
     except Exception as e:
         kodi.log(str(e))
         import traceback
         traceback.print_exc(file=sys.stdout)
-        kodi.addItem('[COLOR ghostwhite]Speed Test is unavailable[/COLOR]', '', "", artwork + 'speed_test.png',
-                     description='')
+        kodi.add_item('[COLOR ghostwhite]Speed Test is unavailable[/COLOR]', '', "", artwork + 'speed_test.png',
+                      description='')
     viewsetter.set_view("sets")
 
 
@@ -416,8 +411,8 @@ def cleanse_title(text):
 def get_params():
     param = []
     paramstring = sys.argv[2]
-    kodi.log('\t\t\tPRAMSTRING= ' + str(paramstring), '')
-    kodi.log('\t\t\tsys.arg= ' + str(sys.argv), '')
+    kodi.log('\t\t\tPRAMSTRING= ' + str(paramstring), 0)
+    kodi.log('\t\t\tsys.arg= ' + str(sys.argv), 0)
     if len(paramstring) >= 2:
         params_l = sys.argv[2]
         cleanedparams = params_l.replace('?', '')
@@ -430,7 +425,7 @@ def get_params():
             splitparams = pairsofparams[i].split('=')
             if (len(splitparams)) == 2:
                 param[splitparams[0]] = splitparams[1]
-    kodi.log('\t\t\tparam= ' + str(param), '')
+    kodi.log('\t\t\tparam= ' + str(param), 0)
     return param
 
 
@@ -471,7 +466,7 @@ try:
 except:
     pass
 try:
-    kodi.log('PARAMS= ' + str(params), '')
+    kodi.log('PARAMS= ' + str(params), 0)
     mode = unquote_plus(params["mode"])
 
 except:
@@ -515,12 +510,10 @@ elif mode == 'log_upload':
 
 elif mode == 'log_view':
     textviewer.window()
-    # TextViewer.text_view('log')
 
 elif mode == 'show_note':
     import notification
-    TypeOfMessage = "t"
-    notification.check_news2(TypeOfMessage, override_service=True)
+    notification.check_news2("t", override_service=True)
 
 elif mode == 'nocoin':
     import nocoin
@@ -531,7 +524,7 @@ elif mode == 'call_maintool':
     maintool.tool_menu()
         
 elif mode == 'wipe_addons':
-        maintool.wipe_addons()
+    maintool.wipe_addons()
         
 elif mode == 'clear_cache':
     maintool.delete_cache()
@@ -577,6 +570,7 @@ elif mode == 'updateaddons':
                                                 'repositories immediately.')
     if choice == 1:
         xbmc.executebuiltin("UpdateAddonRepos")
+        xbmc.sleep(500)
         xbmc.executebuiltin("UpdateLocalAddons")    
     else:
         quit()
@@ -592,7 +586,7 @@ elif mode == "runtest":
     speedtest.runfulltest(url)
 
 elif mode == 'call_restore':
-        freshstart.startup_freshstart()
+    freshstart.startup_freshstart()
         
 # #########  NOTIFICATIONS  ##############
 elif mode == 'toggle_notify':
@@ -618,44 +612,44 @@ elif mode == 'uninstall_keymap':
 
 # #############  Installer  ##########################################################
 elif mode == 'call_installer':
-    installer.MAININDEX()
+    installer.main_index()
 
 elif mode == 'lib_installer':
     installer.libinstaller(name, url)
 
 elif mode == 'addoninstall':
     # kodi.log("TRYING MODES")
-    installer.ADDONINSTALL(name, url, description, filetype, repourl)
+    installer.addon_install(name, url, repourl)
 
 # elif mode == 'interrepolist':
 #     items = installer.List_Inter_Addons(url)
 
 elif mode == 'interrepos':
-    items = installer.INTERNATIONAL_REPOS()
+    items = installer.international_repos()
 
 elif mode == 'interaddons':
-    items = installer.INTERNATIONAL_ADDONS()
+    items = installer.international_addons()
 
 elif mode == 'interaddonslist':
-    items = installer.INTERNATIONAL_ADDONS_LIST(url)
+    items = installer.international_addons_list(url)
 
 elif mode == 'interlist':
-    items = installer.INTERNATIONAL_ADDONS()
+    items = installer.international_addons()
 
 elif mode == 'addonlist':
-    items = installer.List_Addons(url)
+    items = installer.list_addons(url)
 
 elif mode == 'splitlist':
-    installer.Split_List(name, url)
+    installer.split_list(name, url)
 
 elif mode == 'addopensub':
-    installer.OPENSUBINSTALL(url)
+    installer.open_sub_install(url)
 
 elif mode == 'searchaddon':
-    installer.SEARCHADDON(url)
+    installer.search_addon()
 
 elif mode == 'github_main':
-    installer.github_main(url)
+    installer.github_main()
 
 # elif mode == 'github_history':
 #     installer.github_history(url)
@@ -665,7 +659,7 @@ elif mode == 'github_main':
 #
 # elif mode == 'github_results':
 #     installer.github_results(url)
-#Update(plugin://plugin.git.browser)
+# Update(plugin://plugin.git.browser)
 # elif mode == 'github_install':
 #     installer.github_install(url)
 #
@@ -683,11 +677,11 @@ elif mode == 'urlzip':
     installer.install_from_url()
 
 elif mode == 'adultlist':
-    items = installer.List_Adult(url)
+    items = installer.list_adult()
 
 # #######################################################################################
 elif mode == 'EnableRTMP':
-    installer.EnableRTMP()
+    installer.enable_rtmp()
 
 # ######  REJUVINATE  ###########
 elif mode == 'call_rejuv':
@@ -721,15 +715,15 @@ elif mode == 'do_backup_restore':
     backup.restore()
 
 elif mode == 'display_backup_settings':
-    kodi.openSettings(addon_id, id1=0, id2=0)
+    kodi.open_settings(addon_id, id1=0, id2=0)
 
 elif mode == 'read_zip':
     backup.read_zip(url)
 
 elif mode == 'del_backup':
-    backup.ListBackDel()
+    backup.list_back_del()
 
 elif mode == 'do_del_backup':
-    backup.DeleteBackup(url)
+    backup.delete_backup(url)
 
 xbmcplugin.endOfDirectory(int(sys.argv[1]))

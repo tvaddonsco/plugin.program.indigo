@@ -5,12 +5,12 @@ import traceback
 from libs import kodi
 
 
-def all(_in, _out, dp=None):
+def extract_all(_in, _out, dp=None):
     _in = _in.replace('/storage/emulated/0/', '/sdcard/')
     _out = _out.replace('/storage/emulated/0/', '/sdcard/')
     kodi.log('\t_in= ' + _in + '\t_out= ' + _out)
     try:
-        zin = zipfile.ZipFile(_in, 'r')
+        zin = zipfile.ZipFile(_in, 'r')  # , allowZip64=True)
         if not dp:
             zin.extractall(_out)
         else:
@@ -31,5 +31,5 @@ def all(_in, _out, dp=None):
             return True
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            kodi.okDialog(str(e), 'Please try again later', 'Attempting to continue...', "There was an error:")
+            kodi.ok_dialog(str(e), 'Please try again later', 'Attempting to continue...', "There was an error:")
             return False

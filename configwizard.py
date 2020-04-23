@@ -68,7 +68,7 @@ def HELPWIZARD(name, url, description, filetype):
             dialog.ok("Error!", 'filetype: "%s"' % str(filetype))
             return
         xbmc.sleep(4000)
-        extract.all(lib, addonfolder, dp)
+        extract.extract_all(lib, addonfolder, dp)
         xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
         addon_able.setall_enable()
         try:

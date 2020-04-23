@@ -25,24 +25,26 @@ try:
 except ImportError:
     from urllib2 import urlopen, Request  # python 2.x
 
+
 class MyException(Exception):
     pass
 
-def download(url, dest, dp = None,timeout = None):
+
+def download(url, dest, dp=None, timeout=None, silent=False):
     if not timeout:
         timeout = 120
-
     try:
-        if not dp:
-            dp = xbmcgui.DialogProgress()
-            dp.create("Status...","Checking Installation",' ', ' ')
-        dp.update(0)
+        if not silent:
+            if not dp:
+                dp = xbmcgui.DialogProgress()
+                dp.create("Status...", "Checking Installation", ' ', ' ')
+            dp.update(0)
         start_time = time.time()
         u = urlopen(url, timeout=timeout)
         h = u.info()
         totalSize = int(h["Content-Length"])
         fp = open(dest, 'wb')
-        blockSize = 8192 #100000 # urllib.urlretrieve uses 8192
+        blockSize = 8192  # 100000 # urllib.urlretrieve uses 8192
         count = 0
         while True:  # and (end - start < 15):
             if time.time() - start_time > timeout:
@@ -56,23 +58,24 @@ def download(url, dest, dp = None,timeout = None):
             if totalSize > 0:
                 try:
                     percent = int(count * blockSize * 100 / totalSize)
-                    dp.update(percent)
+                    dp.update(percent) if not silent else ''
                 except:
-                    percent = 100
-                    dp.update(percent)
-                if dp.iscanceled():
-                    dp.close()
-                    raise Exception("Canceled")
-        timetaken =  time.time() - start_time
+                    if not silent:
+                        percent = 100
+                        dp.update(percent)
+                        if dp.iscanceled():
+                            dp.close()
+                            raise Exception("Canceled")
+        timetaken = time.time() - start_time
         kodi.log('Duration of download was %.02f secs ' % timetaken )
     # except socket.timeout as e:
     except Exception as e:
         # For Python 2.7
         kodi.message("There was an error: %r" % e, 'Files could not be downloaded at this time', 'Please try again later, Attempting to continue...')
         return
-    except Exception as e:
-        kodi.message("There was an error:", str(e),'Please try again later, Attempting to continue...')
-        return
+    # except Exception as e:
+    #     kodi.message("There was an error:", str(e),'Please try again later, Attempting to continue...')
+    #     return
 
 
 

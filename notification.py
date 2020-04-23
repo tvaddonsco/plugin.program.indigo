@@ -78,7 +78,7 @@ class PopupNote(xbmcgui.WindowXMLDialog):
             #xbmc.sleep(50)
             self.close()
             import installer
-            installer.github_main('')
+            installer.github_main()
             
         elif control_id == self.remind_later:
             settings.setSetting("noteType", '')
@@ -169,7 +169,7 @@ def check_news2(message_type, override_service=False):
     # debob(["notifications-on-startup", settings.getSetting("notifications-on-startup"), "override_service ",
     #        override_service])
     if (settings.getSetting("notifications-on-startup") == 'false') or override_service:
-        info_location = "http://indigo.tvaddons.co/notifications/news.txt"
+        info_location = "https://indigo.tvaddons.co/notifications/news.txt"
         info_location2 = addon_path("test.txt")
         info_location3 = addon_path("url.txt")
         try:

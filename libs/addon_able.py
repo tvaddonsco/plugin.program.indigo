@@ -8,7 +8,6 @@ from libs import kodi
 
 addon_id = kodi.addon_id
 db_dir = xbmc.translatePath("special://profile/Database")
-
 db_path = os.path.join(db_dir, 'Addons27.db')
 
 conn = db_lib.connect(db_path)
@@ -17,22 +16,17 @@ conn.text_factory = str
 ADDON = xbmcaddon.Addon(id=kodi.addon_id)
 
 
-def set_enabled(newaddon, data=None):
+def set_enabled(newaddon):
     if kodi.get_kversion() > 16.5:
         kodi.log("Enabling " + newaddon)
         setit = 1
-        if data is None:
-            data = ''
         now = datetime.datetime.now()
         date_time = str(now).split('.')[0]
-        # sql = 'REPLACE INTO installed (addonID,enabled) VALUES(?,?)'
         sql = 'REPLACE INTO installed (addonID,enabled,installDate) VALUES(?,?,?)'
         conn.execute(sql, (newaddon, setit, date_time,))
         conn.commit()
-        # xbmc.executebuiltin("InstallAddon(%s)" % newaddon)
-        # xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
-    else:
-        pass
+        xbmc.executebuiltin("UpdateAddonRepos") if newaddon.startswith('repo') else ''
+        xbmc.executebuiltin("UpdateLocalAddons") if not newaddon.startswith('repo') else ''
 
 
 def setall_enable():
@@ -42,6 +36,17 @@ def setall_enable():
         kodi.log(contents)
         conn.executemany('update installed set enabled=1 WHERE addonID = (?)', ((val,) for val in contents))
         conn.commit()
+        xbmc.executebuiltin("UpdateAddonRepos")
+        xbmc.sleep(500)
+        xbmc.executebuiltin("UpdateLocalAddons")
 
-    else:
-        pass
+
+def set_disabled(addon):
+    if kodi.get_kversion() > 16.5:
+        xbmc.executebuiltin("StopScript(%s)" % addon)
+        conn.execute('DELETE FROM installed WHERE addonID=?', (addon,))
+        conn.commit()
+        xbmc.executebuiltin("Container.Update", True)
+        xbmc.executebuiltin("Container.Refresh")
+        xbmc.executebuiltin("UpdateAddonRepos") if addon.startswith('repo') else ''
+        xbmc.executebuiltin("UpdateLocalAddons")

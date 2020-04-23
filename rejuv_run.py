@@ -47,7 +47,7 @@ def JUVWIZARD(filetype='main'):
         dp.create(AddonTitle, " ", 'Downloading and Configuring ', 'Please Wait')
         downloader.download(link, lib, dp)
         xbmc.sleep(4000)
-        extract.all(lib, addonfolder, dp)
+        extract.extract_all(lib, addonfolder, dp)
         xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
         addon_able.setall_enable()
         try:

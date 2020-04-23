@@ -84,33 +84,33 @@ def tool_menu():
     debug_desc = debug_onoff + " Debugging!"
     
     # Maintenance Tool Menu
-    kodi.addItem("Clear Cache " + str(paths[menu_cache_path]), '', 'clear_cache', artwork + 'currentcache.png',
+    kodi.add_item("Clear Cache " + str(paths[menu_cache_path]), '', 'clear_cache', artwork + 'currentcache.png',
                  description="Clear your device cache!")
-    kodi.addItem("Delete Thumbnails " + str(paths[thumbnail_path]), '', 'clear_thumbs', artwork + 'currentthumbs.png',
+    kodi.add_item("Delete Thumbnails " + str(paths[thumbnail_path]), '', 'clear_thumbs', artwork + 'currentthumbs.png',
                  description="Delete your Thumbnail cache!")
-    kodi.addItem("Delete Packages " + str(paths[packages_path]), '', 'purge_packages', artwork + 'currentpackages.png',
+    kodi.add_item("Delete Packages " + str(paths[packages_path]), '', 'purge_packages', artwork + 'currentpackages.png',
                  description="Delete your addon installation files!")
-    kodi.addItem("Delete Crash Logs", '', 'crashlogs', artwork + 'clearcrash.png',
+    kodi.add_item("Delete Crash Logs", '', 'crashlogs', artwork + 'clearcrash.png',
                  description="Clear all crash logs from your device!")
-    kodi.addItem("Delete Textures13.db", '', 'deletetextures', artwork + 'currentthumbs.png',
+    kodi.add_item("Delete Textures13.db", '', 'deletetextures', artwork + 'currentthumbs.png',
                  description="This will delete the Textures13 database")
-    kodi.addDir("Wipe Addons", '', 'wipe_addons', artwork + 'wipe_addons.png',
+    kodi.add_dir("Wipe Addons", '', 'wipe_addons', artwork + 'wipe_addons.png',
                 description="Erase all your Kodi addons in one shot!")
-    kodi.addItem("Run Auto Maintenance", '', 'autoclean', artwork + 'run_am.png',
+    kodi.add_item("Run Auto Maintenance", '', 'autoclean', artwork + 'run_am.png',
                  description="Clear your cache, thumbnails and delete addon packages in one click!")
-    kodi.addItem(startup_onoff + ' Auto Maintenance on Startup', '', 'autocleanstartup', artwork + su_art,
+    kodi.add_item(startup_onoff + ' Auto Maintenance on Startup', '', 'autocleanstartup', artwork + su_art,
                  description=su_desc)
-    kodi.addItem(weekly_onoff + ' Weekly Auto Maintenance', '', 'autocleanweekly', artwork + acw_art,
+    kodi.add_item(weekly_onoff + ' Weekly Auto Maintenance', '', 'autocleanweekly', artwork + acw_art,
                  description=acw_desc)
-    kodi.addItem(debug_onoff + " Debugging Mode", '', 'debug_onoff', artwork + debug_art,
+    kodi.add_item(debug_onoff + " Debugging Mode", '', 'debug_onoff', artwork + debug_art,
                  description=debug_desc)
-    kodi.addItem(scb_onoff + " Malicious Scripts Blocker", '', 'toggleblocker', artwork + scb_art,
+    kodi.add_item(scb_onoff + " Malicious Scripts Blocker", '', 'toggleblocker', artwork + scb_art,
                  description=scb_desc)
-    kodi.addItem("Force Update Addons", '', 'updateaddons', artwork + 'forceupdateaddons.png',
+    kodi.add_item("Force Update Addons", '', 'updateaddons', artwork + 'forceupdateaddons.png',
                  description="Force a reload of all Kodi addons and repositories!")
-    kodi.addDir("Install Custom Keymaps", '', 'customkeys', artwork + 'custom_keymaps.png',
+    kodi.add_dir("Install Custom Keymaps", '', 'customkeys', artwork + 'custom_keymaps.png',
                 description="Get the best experience out of your device-specific remote control!")
-    kodi.addItem("Reload Current Skin", '', 'reloadskin', artwork + 'reloadskin.png',
+    kodi.add_item("Reload Current Skin", '', 'reloadskin', artwork + 'reloadskin.png',
                  description="Reload the skin!")
     viewsetter.set_view("sets")
 
@@ -219,7 +219,7 @@ def delete_textures():
 
 
 def wipe_addons():
-    # kodi.logInfo('WIPE ADDONS ACTIVATED')
+    # kodi.log_info('WIPE ADDONS ACTIVATED')
     if xbmcgui.Dialog().yesno("Please Confirm",
                               "                     Please confirm that you wish to uninstall",
                               "                              all addons from your device!",
@@ -257,7 +257,7 @@ def toggle_setting(setting_title, setting, restart=False, silent=False):
         if not xbmcgui.Dialog().yesno(setting_title,
                                       'Please confirm that you wish to TURN %s %s' % (status_on_off, setting_title),
                                       '', '', 'Cancel', 'Confirm'):
-                return
+            return
     if kodi.get_setting(setting) == 'true':
         kodi.set_setting(setting, 'false')
     else:
@@ -275,7 +275,7 @@ def auto_weekly_clean_on_off():
     if kodi.get_setting("clearday") == '7':
         if xbmcgui.Dialog().yesno(AddonName, 'Please confirm that you wish to enable weekly automated maintenance.'):
             kodi.set_setting("clearday", datetime.datetime.today().weekday())
-            kodi.openSettings(addon_id, id1=5, id2=3)
+            kodi.open_settings(addon_id, id1=5, id2=3)
             available_space, total_space = get_free_space_mb(xbmc.translatePath('special://home'))
             if str(available_space) == '0 B Free' and str(total_space) == '0 B Total':
                 xbmcgui.Dialog().ok('Auto Maintenance Error',
@@ -291,7 +291,7 @@ def auto_weekly_clean_on_off():
                     xbmcgui.Dialog().ok("Your settings sizes for Kodi to use are larger than the available drive space",
                                         'Please try lower settings, uninstall uneeded apps and addons,',
                                         'or set kodi size to "Auto" to use the automated settings based on free space')
-                    kodi.openSettings(addon_id, id1=5, id2=3)
+                    kodi.open_settings(addon_id, id1=5, id2=3)
                 else:
                     break
     else:
@@ -442,20 +442,21 @@ def _is_debugging():
 
 
 def source_change():
-    new_source = userdata_path + "/sources.xml"
-    try:
-        with open(new_source) as fi:
-            a = fi.read()
-            if 'fusion.tvaddons.ag' in a:
-                b = a.replace('http://www.fusion.tvaddons.ag', 'http://fusion.tvaddons.co')
-            elif 'https://code.sourcecode.ag' in a:
-                b = a.replace('https://code.sourcecode.ag', 'http://fusion.tvaddons.co')
-            else:
-                return
-            with open(new_source, "w") as fil:
-                fil.write(str(b))
-    except Exception as e:
-        kodi.log(str(e))
+    new_source = userdata_path + "sources.xml"
+    if os.path.isfile(new_source):
+        try:
+            with open(new_source) as fi:
+                a = fi.read()
+                if 'fusion.tvaddons.ag' in a:
+                    b = a.replace('http://www.fusion.tvaddons.ag', 'http://fusion.tvaddons.co')
+                elif 'https://code.sourcecode.ag' in a:
+                    b = a.replace('https://code.sourcecode.ag', 'http://fusion.tvaddons.co')
+                else:
+                    return
+                with open(new_source, "w") as fil:
+                    fil.write(str(b))
+        except Exception as e:
+            kodi.log(str(e))
 
 
 def feed_change():

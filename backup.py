@@ -2,12 +2,14 @@ import shutil
 import time
 import urllib
 import zipfile
+import traceback
 
 import os
 import sys
 import xbmc
 import xbmcaddon
 import xbmcgui
+# import extract
 from libs import kodi
 from libs import viewsetter
 
@@ -24,27 +26,27 @@ dialog = xbmcgui.Dialog()
 
 
 def backup_menu():
-    kodi.addItem('[COLOR white]Select Backup Location[/COLOR]', 'url', 'display_backup_settings', '',
+    kodi.add_item('[COLOR white]Select Backup Location[/COLOR]', 'url', 'display_backup_settings', '',
                  description="Choose the location to which you wish to store your backups!")
-    kodi.addItem('[COLOR white]Full Backup (All Files and Folders Included)[/COLOR]', 'url', 'full_backup', '',
+    kodi.add_item('[COLOR white]Full Backup (All Files and Folders Included)[/COLOR]', 'url', 'full_backup', '',
                  description="Backup everything possible!")
-    kodi.addItem('[COLOR white]Backup No Database (No Database Files Included)[/COLOR]', 'url', 'small_backup', '',
+    kodi.add_item('[COLOR white]Backup No Database (No Database Files Included)[/COLOR]', 'url', 'small_backup', '',
                  description="Backup your Kodi configuration without unnecessary database files!")
-    kodi.addDir('[COLOR white]Restore Backup[/COLOR]', '', 'do_backup_restore', '',
+    kodi.add_dir('[COLOR white]Restore Backup[/COLOR]', '', 'do_backup_restore', '',
                 description="Restore your Kodi configuration from a backup!")
-    kodi.addDir('[COLOR white]Delete Backup[/COLOR]', '', 'del_backup', '',
+    kodi.add_dir('[COLOR white]Delete Backup[/COLOR]', '', 'del_backup', '',
                 description="Erase any backups you have saved!")
     viewsetter.set_view("sets")
 
 
 def check_path():
     if zip_setting == "Click Here":
-        kodi.openSettings(addon_id, id1=0, id2=0)
+        kodi.open_settings(addon_id, id1=0, id2=0)
         sys.exit(0)
     if home_path in zip_path:
         dialog.ok(AddonTitle, 'Invalid backup path. The selected path may be removed during backup '
                               'and cause an error. Please pick another path that is not in the Kodi directory')
-        kodi.openSettings(addon_id, id1=0, id2=0)
+        kodi.open_settings(addon_id, id1=0, id2=0)
         sys.exit(0)
 
 
@@ -62,7 +64,7 @@ def set_name():
         return False
     try:
         title = urllib.quote_plus(vq)
-    except:
+    except AttributeError:
         title = urllib.parse.quote_plus(vq)
     return title
 
@@ -70,7 +72,7 @@ def set_name():
 # #############  Backup  ############################################
 
 def backup(b_type):
-    exclude_dirs = ['backupdir', 'cache', 'temp']
+    exclude_dirs = ['cache', 'archive_cache', 'temp', kodi.get_setting('zip').strip('/')]
     exclude_files = [logfile_name + '.log', logfile_name + '.old.log']
     message_header = "%s Is Creating A %s Backup..." % (AddonTitle, b_type.replace('_', ' ').title())
     message1 = "Archiving..."
@@ -93,7 +95,11 @@ def backup(b_type):
             if not title:
                 return False, 0
             destfile = xbmc.translatePath(os.path.join(zip_path, str(title) + '.zip'))
-    zipobj = zipfile.ZipFile(destfile, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
+    try:
+        zipobj = zipfile.ZipFile(destfile, 'w', zipfile.ZIP_DEFLATED)  # , allowZip64=True)
+    except IOError as e:
+        dialog.ok('ERROR', 'Could Not Use This Location for Backup', 'Please Chose Another Location', str(e))
+        return
     rootlen = len(home_path)
     for_progress = []
     item = []
@@ -122,23 +128,86 @@ def backup(b_type):
     
 
 # ################  Restore  ####################################
-
 def restore():
     if zip_path != 'Click Here':
         for zip_file in os.listdir(zip_path):
             if zip_file.endswith(".zip"):
                 url = xbmc.translatePath(os.path.join(zip_path, zip_file))
-                kodi.addItem(zip_file, url, 'read_zip', '', '', '')
+                kodi.add_item(zip_file, url, 'read_zip', '', '', '')
 
 
-def read_zip(url):
-    if not dialog.yesno(AddonTitle, "[COLOR smokewhite]" + url + "[/COLOR]", "Do you want to restore this backup?",
-                        os.path.basename(url)):
+def find_all_paths(file_name, path):
+    paths = []
+    for root, dirs, files in os.walk(path):
+        if file_name in files:
+            paths.append(os.path.join(root, file_name))
+    return paths
+
+
+def read_zip(zip_name):
+    if not dialog.yesno(AddonTitle, "[COLOR smokewhite]" + zip_name + "[/COLOR]", "Do you want to restore this backup?",
+                        os.path.basename(zip_name)):
         sys.exit(1)
     dp.create(AddonTitle, "Restoring Kodi.", 'In Progress.............', 'Please Wait')
-    #wipe_backup_restore()
-    dp.create(AddonTitle, "Restoring File:", url, '')
-    kodi.extract_all(url, home_path, dp)
+
+    zip_name.replace('/storage/emulated/0/', '/sdcard/')
+    home_path.replace('/storage/emulated/0/', '/sdcard/')
+    zin = None
+    kodi.log('\t_in= ' + zip_name + '\t_out= ' + home_path)
+
+    # #####     read zip     #####
+    try:
+        zin = zipfile.ZipFile(zip_name, 'r')  # , allowZip64=True)
+    except Exception as e:
+        kodi.log(e)
+        traceback.print_exc(file=sys.stdout)
+        for path in find_all_paths(os.path.basename(zip_name), os.path.abspath(os.sep)):  # '/storage')
+            kodi.log('\t trying source path: ' + path)
+            try:
+                zin = zipfile.ZipFile(path, 'r')  # , allowZip64=True)
+                if zin:
+                    break
+            except Exception as e:
+                kodi.log(e)
+                traceback.print_exc(file=sys.stdout)
+
+    if not zin:
+        dialog.ok(AddonTitle + 'Restore', "Could Not Read Backup Zip File.", "Click OK to Exit Restore.")
+        return
+    # wipe_backup_restore()
+
+    dp.create(AddonTitle, "Restoring File:", zip_name, '')
+    # kodi.ext_all(zip_name, home_path, dp)
+    # kodi.extract_all(zip_name, home_path, dp)
+    # extract.extract_all(zip_name, home_path, dp)
+
+    # #####     extract zip     #####
+    try:
+        if not dp:
+            zin.extractall(home_path)
+        else:
+            n_files = float(len(zin.infolist()))
+            count = 0
+            for item in zin.infolist():
+                if dp:
+                    count += 1
+                    update = count / n_files * 100
+                    dp.update(int(update))  # , '', '', '[COLOR dodgerblue][B]' + str(item.filename) + '[/B][/COLOR]')
+                zin.extract(item, home_path)
+        return True
+    except Exception as e:
+        kodi.log(e)
+        traceback.print_exc(file=sys.stdout)
+        try:
+            xbmc.executebuiltin("Extract(%s, %s)" % (zip_name, home_path))
+            xbmc.sleep(1800)
+            # return True
+        except Exception as e:
+            traceback.print_exc(file=sys.stdout)
+            # all(_in, _out, dp=None)
+            dialog.ok(str(e), 'Please try again later', 'Attempting to continue...', "There was an error:")
+            return False
+
     dialog.ok(AddonTitle, "Installation Complete.", "", "Click OK to exit Kodi and then restart to complete.")
     xbmc.executebuiltin('ShutDown')
 
@@ -150,35 +219,37 @@ def wipe_backup_restore():
     dp.create(AddonTitle, "Cleaning Install", 'Removing old folders.', 'Please Wait')
     for (root, dirs, files) in os.walk(home_path, topdown=True):
         dirs[:] = [d for d in dirs if d not in sub_dir_exclude]
-        files[:] = [file for file in files if file not in file_exclude]
+        files[:] = [f for f in files if f not in file_exclude]
         for folder in dirs:
             try:
                 if folder not in dir_exclude:
                     shutil.rmtree(os.path.join(root, folder))
-            except:
-                pass
+            except Exception as e:
+                kodi.log(e)
+                traceback.print_exc(file=sys.stdout)
         for file_name in files:
             try:
                 os.remove(os.path.join(root, file_name))
-            except:
-                pass
+            except Exception as e:
+                kodi.log(e)
+                traceback.print_exc(file=sys.stdout)
         
 
-def ListBackDel():
-    for file in os.listdir(zip_path):
-        if file.endswith(".zip"):
-            url = xbmc.translatePath(os.path.join(zip_path, file))
-            kodi.addDir(file, url, 'do_del_backup', '')
+def list_back_del():
+    for f in os.listdir(zip_path):
+        if f.endswith(".zip"):
+            url = xbmc.translatePath(os.path.join(zip_path, f))
+            kodi.add_dir(f, url, 'do_del_backup', '')
 
 
-def DeleteBackup(url):
+def delete_backup(url):
     if dialog.yesno(AddonTitle, "[COLOR smokewhite]" + url + "[/COLOR]", "Do you want to delete this backup?",
                     os.path.basename(url)):
         os.remove(url)
         dialog.ok(AddonTitle, "[COLOR smokewhite]" + url + "[/COLOR]", "Successfully deleted.")
 
 
-def DeleteAllBackups():
+def delete_all_backups():
     if dialog.yesno(AddonTitle, "Do you want to delete all backups?"):
         shutil.rmtree(zip_path)
         os.makedirs(zip_path)

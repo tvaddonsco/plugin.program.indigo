@@ -11,7 +11,7 @@ AddonTitle = "Rejuvinate Kodi"
 
 
 def startup_rejuv():
-    if kodi.yesnoDialog("Please confirm that you wish you wipe clean your current configuration"
+    if kodi.yesno_dialog("Please confirm that you wish you wipe clean your current configuration"
                         "and reconfigure Kodi with the latest Config Wizard update!",
                         "        This will result in the loss of all your current data!", '',AddonTitle):
         addonPath = kodi.addon.getAddonInfo('path')
@@ -23,7 +23,7 @@ def startup_rejuv():
         #  Directories and sub directories Directories to ignore and leave intact
         sub_dir_exclude = ['metadata.album.universal', 'metadata.artists.universal', 'service.xbmc.versioncheck',
                            'metadata.common.musicbrainz.org', 'metadata.common.imdb.com', AddonID]
-        # if kodi.yesnoDialog(AddonTitle, "Do you wish to keep %s installed for convenience after the factory restore?"
+        # if kodi.yesno_dialog(AddonTitle, "Do you wish to keep %s installed for convenience after the factory restore?"
         #                     % AddonTitle, '', nolabel='No', yeslabel='Yes'):
         #     sub_dir_exclude.extend([AddonID])
         #  Files to ignore and not to be removed

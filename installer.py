@@ -23,12 +23,17 @@ from libs import viewsetter
 
 try:
     from itertools import izip_longest
-except:
+except ImportError:
     from itertools import zip_longest as izip_longest
+
+    try:
+        from urllib import urlretrieve as urlretrieve
+    except ImportError:
+        from urllib.request import urlretrieve as urlretrieve
 
 try:
     quote_plus = urllib.quote_plus
-except:
+except AttributeError:
     quote_plus = urllib.parse.quote_plus
 
 # if kodi.get_kversion() > 16.5:
@@ -46,9 +51,10 @@ artPath = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id, 
 artwork1 = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id, 'art/'))
 artwork = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id, 'art2/'))
 mainPath = xbmc.translatePath(os.path.join('special://home', 'addons', addon_id))
+packages_path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
+addon_folder = xbmc.translatePath(os.path.join('special://', 'home', 'addons'))
 fanart = xbmc.translatePath(os.path.join(mainPath, 'fanart.jpg'))
 iconart = xbmc.translatePath(os.path.join(mainPath, 'icon.png'))
-# dp = xbmcgui.DialogProgress()
 dialog = xbmcgui.Dialog()
 # <<<<<<<<<Common Variables>>>>>>>>>>>>>>>
 # Keymaps_URL = base64.b64decode("aHR0cDovL2luZGlnby50dmFkZG9ucy4va2V5bWFwcy9jdXN0b21rZXlzLnR4dA==")
@@ -77,14 +83,13 @@ def get_params():
         paramstring = '?content_type=video'
     # paramstring = sys.argv[2]
     if len(paramstring) >= 2:
-        params = paramstring  # sys.argv[2]
-        cleanedparams = params.replace('?', '')
-        if params[len(params) - 1] == '/':
-            params = params[0:len(params) - 2]
+        gparams = paramstring  # sys.argv[2]
+        cleanedparams = gparams.replace('?', '')
+        if cleanedparams[len(cleanedparams) - 1] == '/':
+            cleanedparams = cleanedparams[0:len(cleanedparams) - 2]
         pairsofparams = cleanedparams.split('&')
         param = {}
         for i in range(len(pairsofparams)):
-            splitparams = {}
             splitparams = pairsofparams[i].split('=')
             if (len(splitparams)) == 2:
                 param[splitparams[0]] = splitparams[1]
@@ -92,73 +97,70 @@ def get_params():
 
 
 params = get_params()
-# url = None
-# name = None
-# mode = None
-# year = None
-# imdb_id = None
 
 
 # ****************************************************************
-def MAININDEX():
+def main_index():
     xbmc.executebuiltin("UpdateAddonRepos")
-    kodi.addItem("Git Browser", '', 'github_main', artwork + 'github_browser.png',
+    kodi.add_item("Git Browser", '', 'github_main', artwork + 'github_browser.png',
                  description="Search for repositories hosted on GitHub.")
     try:
         if len(str(api.get_all_addons())) < 20:
             raise ValueError('API is less than 20')
-        kodi.addDir('Search by: Addon/Author', '', 'searchaddon', artwork + 'search.png',
+        kodi.add_dir('Search by: Addon/Author', '', 'searchaddon', artwork + 'search.png',
                     description="Search for addons by Name or Author")
         if settings.getSetting('featured') == 'true':
-            kodi.addDir('Featured Addons', 'featured', 'addonlist', artwork + 'featured.png',
+            kodi.add_dir('Featured Addons', 'featured', 'addonlist', artwork + 'featured.png',
                         description="The most popular Kodi addons!")
         # if settings.getSetting('livetv') == 'true':
-        #     kodi.addDir('Live TV Addons', 'live', 'addonlist', artwork + 'livetv.png',
+        #     kodi.add_dir('Live TV Addons', 'live', 'addonlist', artwork + 'livetv.png',
         #                 description="The most popular live TV addons!")
         # if settings.getSetting('sports') == 'true':
-        #     kodi.addDir('Sports Addons', 'sports', 'addonlist', artwork + 'sports.png',
+        #     kodi.add_dir('Sports Addons', 'sports', 'addonlist', artwork + 'sports.png',
         #                 description="The most popular sports addons!")
         if settings.getSetting('video') == 'true':
-            kodi.addDir('Video Addons', 'video', 'addonlist', artwork + 'video.png',
+            kodi.add_dir('Video Addons', 'video', 'addonlist', artwork + 'video.png',
                         description="Every video addon in existence!")
         if settings.getSetting('audio') == 'true':
-            kodi.addDir('Audio Addons', 'audio', 'addonlist', artwork + 'audio.png',
+            kodi.add_dir('Audio Addons', 'audio', 'addonlist', artwork + 'audio.png',
                         description="Find addons to listen to music!")
         if settings.getSetting('program') == 'true':
-            kodi.addDir('Program Addons', 'executable', 'addonlist', artwork + 'program.png',
+            kodi.add_dir('Program Addons', 'executable', 'addonlist', artwork + 'program.png',
                         description="Every program addon you can imagine!")
         # if settings.getSetting('playlist') == 'true':
-        #     kodi.addDir('Playlist Addons', 'playlists', 'addonlist', artwork + 'playlists.png',
+        #     kodi.add_dir('Playlist Addons', 'playlists', 'addonlist', artwork + 'playlists.png',
         #                 description="The most popular playlist addons!")
         if settings.getSetting('services') == 'true':
-            kodi.addDir('Service Addons', 'service', 'addonlist', artwork + 'service.png')
+            kodi.add_dir('Service Addons', 'service', 'addonlist', artwork + 'service.png')
         if settings.getSetting('skincat') == 'true':
-            kodi.addDir('Kodi Skins', 'skins', 'addonlist', artwork + 'kodi_skins.png',
+            kodi.add_dir('Kodi Skins', 'skins', 'addonlist', artwork + 'kodi_skins.png',
                         description="Change up your look!")
         if settings.getSetting('world') == 'true':
-            kodi.addDir('International Addons', 'international', 'interlist', artwork + 'world.png',
+            kodi.add_dir('International Addons', 'international', 'interlist', artwork + 'world.png',
                         description="Foreign language addons and repos from across the globe!")
         if settings.getSetting('adult') == 'true':
-            kodi.addDir('Adult Addons', 'xxx', 'adultlist', artwork + 'adult.png',
+            kodi.add_dir('Adult Addons', 'xxx', 'adultlist', artwork + 'adult.png',
                         description="Must be 18 years or older! This menu can be disabled from within Add-on Settings.")
         # if settings.getSetting('repositories') == 'true':
-        # 	kodi.addDir('Repositories','repositories', 'addonlist', artwork + 'repositories.png',
+        # 	kodi.add_dir('Repositories','repositories', 'addonlist', artwork + 'repositories.png',
         # 				description="Browse addons by repository!")
-    except:
+    except Exception as e:
+        kodi.log(str(e))
         traceback.print_exc(file=sys.stdout)
-        kodi.addItem("Addon Listing Is Temporarily Unavailable", '', '', artwork1 + 'addon_installer.png',
-                    description="The Addon Listing Is Temporarily Unavailable")
-    # kodi.addItem('Enable Live Streaming', 'None', 'EnableRTMP', artwork + 'enablertmp.png',
+        kodi.add_item("Addon Listing Is Temporarily Unavailable", '', '', artwork1 + 'addon_installer.png',
+                     description="The Addon Listing Is Temporarily Unavailable")
+    # kodi.add_item('Enable Live Streaming', 'None', 'EnableRTMP', artwork + 'enablertmp.png',
     # 			 description="Enable RTMP InputStream and InputStream Adaptive modules for Live Streaming.")
-    kodi.addItem('Official OpenSubtitles Addon', openSub, 'addopensub', artwork + 'opensubicon.png',
+    kodi.add_item('Official OpenSubtitles Addon', openSub, 'addopensub', artwork + 'opensubicon.png',
                  description="Install Official OpenSubtitles Addon!")
-    kodi.addDir('Install ZIP from Online Link', '', 'urlzip', artwork + 'onlinesource.png',
+    kodi.add_dir('Install ZIP from Online Link', '', 'urlzip', artwork + 'onlinesource.png',
                 description='Manually download and install addons or repositories from the web.')
     viewsetter.set_view("sets")
 # ****************************************************************
 
 
-def _get_keyboard(default="", heading="", hidden=False):  # Start Ketboard Function
+# Start Keyboard Function
+def _get_keyboard(default="", heading="", hidden=False):
     keyboard = xbmc.Keyboard(default, heading, hidden)
     keyboard.doModal()
     if keyboard.isConfirmed():
@@ -166,16 +168,16 @@ def _get_keyboard(default="", heading="", hidden=False):  # Start Ketboard Funct
     return default
 
 
-def SEARCHADDON(url):  # Start Search Function
+def search_addon():  # Start Search Function
     vq = _get_keyboard(heading="Search add-ons")
     if not vq:
         return False, 0
     title = quote_plus(vq)
-    title = urllib.parse.quote_plus(vq)
-    Get_search_results(title)
+    # title = urllib.parse.quote_plus(vq)
+    get_search_results(title)
 
 
-def Get_search_results(title):
+def get_search_results(title):
     link = api.search_addons(title)
     # my_list = sorted(link, key=lambda k: k['name'].upper())
     # for e in my_list:
@@ -189,16 +191,14 @@ def Get_search_results(title):
 
         if e['extension_point'] != 'xbmc.addon.repository':
             try:
-                addHELPDir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
-                           contextreplace=False)
+                add_help_dir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
+                             contextreplace=False)
             except Exception as e:
                 kodi.log(str(e))
+    viewsetter.set_view("sets")
 
 
-viewsetter.set_view("sets")
-
-
-def github_main(url):
+def github_main():
     try:
         kodi.log('github_main ' + str(xbmc.getCondVisibility('System.HasAddon(repository.xbmchub)')))
         if not xbmc.getCondVisibility('System.HasAddon(plugin.git.browser)'):
@@ -214,21 +214,22 @@ def github_main(url):
                 xbmc.executebuiltin("XBMC.RunPlugin(plugin://plugin.git.browser)")
         else:
             xbmc.executebuiltin("XBMC.Container.Update(plugin://plugin.git.browser)")
-    except:
+    except Exception as e:
+        kodi.log(str(e))
         traceback.print_exc(file=sys.stdout)
 
 
 # ********************************************************************
-def INTERNATIONAL():
-    kodi.addDir('International Repos', '', 'interrepos',
+def international():
+    kodi.add_dir('International Repos', '', 'interrepos',
                 'https://www.tvaddons.co/kodi-addons/images/categories/international.png',
                 description="Foreign language repos from across the globe!")
-    kodi.addDir('International Addons', '', 'interaddons',
+    kodi.add_dir('International Addons', '', 'interaddons',
                 'https://www.tvaddons.co/kodi-addons/images/categories/international.png',
                 description="Foreign language addons from across the globe!")
 
 
-def INTERNATIONAL_REPOS():
+def international_repos():
     link = api.get_all_addons()
     for e in link:
         if e['repository_type'] == 'international' and e['extension_point'] == 'xbmc.addon.repository':
@@ -240,62 +241,62 @@ def INTERNATIONAL_REPOS():
             icon = path.rsplit('/', 1)[0] + '/icon.png'
             l_fanart = path.rsplit('/', 1)[0] + '/fanart.jpg'
             try:
-                addHELPDir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
-                           contextreplace=False)
+                add_help_dir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
+                             contextreplace=False)
             except Exception as e:
                 kodi.log(str(e))
 
 
-def INTERNATIONAL_ADDONS():
+def international_addons():
     imurl = 'https://www.tvaddons.co/kodi-addons/images/categories/international/'
     link = api.get_langs()
     if link:
         # for e in link:
-            # name=e['languages']
-            # kodi.log(name)
-            l_vert = {"af": "African",
-                      "ar": "Arabic",
-                      # "cn": "Chinese",
-                      "zh": "Chinese",
-                      "cs": "Czech",
-                      "da": "Danish",
-                      "nl": "Dutch",
-                      "ph": "Filipino",
-                      "fi": "Finnish",
-                      "fr": "French",
-                      "de": "German",
-                      "el": "Greek",
-                      # "iw": "Hebrew",
-                      "he": "Hebrew",
-                      "hu": "Hungarian",
-                      "is": "Icelandic",
-                      "hi": "Indian",
-                      "ga": "Irish",
-                      "it": "Italian",
-                      "ja": "Japanese",
-                      "ko": "Korean",
-                      "mn": "Mongolian",
-                      "ne": "Nepali",
-                      "no": "Norwegian",
-                      "ur": "Pakistani",
-                      "pl": "Polish",
-                      "pt": "Portuguese",
-                      "ro": "Romanian",
-                      "ru": "Russian",
-                      "ms": "Singapore",
-                      "es": "Spanish",
-                      "sv": "Swedish",
-                      "ta": "Tamil",
-                      "th": "Thai",
-                      "tr": "Turkish",
-                      "vi": "Vietnamese"}
-            for key in sorted(l_vert.items(), key=lambda key: key[1]):
-                kodi.addDir(key[1], key[0], 'interaddonslist', imurl + key[1].lower() + '.png',
-                            description="Foreign language addons from across the globe!")
-                viewsetter.set_view("sets")
+        #     name=e['languages']
+        #     kodi.log(name)
+        l_vert = {"af": "African",
+                  "ar": "Arabic",
+                  # "cn": "Chinese",
+                  "zh": "Chinese",
+                  "cs": "Czech",
+                  "da": "Danish",
+                  "nl": "Dutch",
+                  "ph": "Filipino",
+                  "fi": "Finnish",
+                  "fr": "French",
+                  "de": "German",
+                  "el": "Greek",
+                  # "iw": "Hebrew",
+                  "he": "Hebrew",
+                  "hu": "Hungarian",
+                  "is": "Icelandic",
+                  "hi": "Indian",
+                  "ga": "Irish",
+                  "it": "Italian",
+                  "ja": "Japanese",
+                  "ko": "Korean",
+                  "mn": "Mongolian",
+                  "ne": "Nepali",
+                  "no": "Norwegian",
+                  "ur": "Pakistani",
+                  "pl": "Polish",
+                  "pt": "Portuguese",
+                  "ro": "Romanian",
+                  "ru": "Russian",
+                  "ms": "Singapore",
+                  "es": "Spanish",
+                  "sv": "Swedish",
+                  "ta": "Tamil",
+                  "th": "Thai",
+                  "tr": "Turkish",
+                  "vi": "Vietnamese"}
+        for lang in sorted(l_vert.items(), key=lambda key: lang[1]):
+            kodi.add_dir(lang[1], lang[0], 'interaddonslist', imurl + lang[1].lower() + '.png',
+                        description="Foreign language addons from across the globe!")
+            viewsetter.set_view("sets")
 
 
-def INTERNATIONAL_ADDONS_LIST(url):
+def international_addons_list(url):
     link = api.get_all_addons()
     my_list = sorted(link, key=lambda k: k['name'])
     for e in my_list:
@@ -308,13 +309,13 @@ def INTERNATIONAL_ADDONS_LIST(url):
             l_fanart = path.rsplit('/', 1)[0] + '/fanart.jpg'
 
             try:
-                addHELPDir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
-                           contextreplace=False)
+                add_help_dir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
+                             contextreplace=False)
             except Exception as e:
                 kodi.log(str(e))
 
 
-def List_Addons(url):
+def list_addons(url):
     specials = ('featured', 'live', 'sports', 'playlists')
     regulars = ('video', 'executable')
     easyreg = ('audio', 'image', 'service', 'skins')
@@ -332,8 +333,8 @@ def List_Addons(url):
                 icon = path.rsplit('/', 1)[0] + '/icon.png'
                 l_fanart = path.rsplit('/', 1)[0] + '/fanart.jpg'
                 try:
-                    addHELPDir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
-                               contextreplace=False)
+                    add_help_dir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
+                                 contextreplace=False)
                 except Exception as e:
                     kodi.log(str(e))
 
@@ -348,8 +349,8 @@ def List_Addons(url):
             icon = path.rsplit('/', 1)[0] + '/icon.png'
             l_fanart = path.rsplit('/', 1)[0] + '/fanart.jpg'
             try:
-                addHELPDir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
-                           contextreplace=False)
+                add_help_dir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '', CMi,
+                             contextreplace=False)
             except Exception as e:
                 kodi.log(str(e))
 
@@ -358,8 +359,8 @@ def List_Addons(url):
         d = dict.fromkeys(string.ascii_uppercase, 0)
         my_list = sorted(d)
         for e in my_list:
-            kodi.addDir(e, url, 'splitlist', artwork + e + '.png', description="Starts with letter " + e)
-        kodi.addDir('Others', url, 'splitlist', artwork + 'symbols.png', description="Starts with another character")
+            kodi.add_dir(e, url, 'splitlist', artwork + e + '.png', description="Starts with letter " + e)
+        kodi.add_dir('Others', url, 'splitlist', artwork + 'symbols.png', description="Starts with another character")
 
     if url == 'repositories':
         link = api.get_repos()
@@ -371,8 +372,8 @@ def List_Addons(url):
             icon = path.rsplit('/', 1)[0] + '/icon.png'
             l_fanart = path.rsplit('/', 1)[0] + '/fanart.jpg'
             try:
-                addHELPDir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', 'None', '', '', CMi,
-                           contextreplace=False)
+                add_help_dir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', 'None', '', '', CMi,
+                             contextreplace=False)
             except Exception as e:
                 kodi.log(str(e))
     if url == 'skins':
@@ -387,14 +388,14 @@ def List_Addons(url):
                 icon = path.rsplit('/', 1)[0] + '/icon.png'
                 l_fanart = path.rsplit('/', 1)[0] + '/fanart.jpg'
                 try:
-                    addHELPDir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', 'None', '', '', CMi,
-                               contextreplace=False)
+                    add_help_dir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', 'None', '', '', CMi,
+                                 contextreplace=False)
                 except Exception as e:
                     kodi.log(str(e))
     viewsetter.set_view("sets")
 
 
-def Split_List(name, url):
+def split_list(name, url):
     regulars = ('video', 'audio', 'image', 'service', 'executable', 'skins')
     letter = name
     if url in regulars:
@@ -411,21 +412,21 @@ def Split_List(name, url):
                 alpha = string.ascii_letters
                 if name.startswith(tuple(alpha)) is False:
                     try:
-                        addHELPDir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '',
-                                   CMi, contextreplace=False)
+                        add_help_dir(name, path, 'addoninstall', icon, l_fanart, description, 'addon', repourl, '', '',
+                                     CMi, contextreplace=False)
                     except Exception as e:
                         kodi.log(str(e))
             else:
                 if name.lower().startswith(letter) or name.upper().startswith(letter):
                     try:
-                        addHELPDir(name, path, 'addoninstall', icon, fanart, description, 'addon', repourl, '', '', CMi,
-                                   contextreplace=False)
+                        add_help_dir(name, path, 'addoninstall', icon, fanart, description, 'addon', repourl, '', '',
+                                     CMi, contextreplace=False)
                     except Exception as e:
                         kodi.log(str(e))
 
 
 # ##<<<<<<<<<<<<<<ADULT SECTIONS>>>>>>>>>>>>>>>>>>>>>
-def List_Adult(url):
+def list_adult():
     if settings.getSetting('adult') == 'true':
         confirm = xbmcgui.Dialog().yesno("Please Confirm",
                                          "                Please confirm that you are at least 18 years of age.",
@@ -438,7 +439,7 @@ def List_Adult(url):
                 "'name' => '(.+?)'.+?dataUrl' => '(.+?)'.+?xmlUrl' => '(.+?)'.+?downloadUrl' => '(.+?)'").findall(link)
             for name, dataurl, url, repourl in match:
                 lang = 'Adults Only'
-                add2HELPDir(name + ' (' + lang + ')', url, 'getaddoninfo', '', fanart, dataurl, repourl)
+                add_2help_dir(name + ' (' + lang + ')', url, 'getaddoninfo', '', fanart, dataurl, repourl)
                 if len(match) == 0:
                     return
         else:
@@ -453,12 +454,12 @@ def getaddoninfo(url, dataurl, repourl):
     match = re.compile('<addon id="(.+?)".+?ame="(.+?)".+?ersion="(.+?)"').findall(link)
     for adid, name, version in match:
         dload = dataurl + adid + "/" + adid + "-" + version + ".zip"
-        addHELPDir(name + ' (' + lang + ')', dload, 'addoninstall', '', fanart, '', 'addon', repourl, '', '')
+        add_help_dir(name + ' (' + lang + ')', dload, 'addoninstall', '', fanart, '', 'addon', repourl, '', '')
         viewsetter.set_view("sets")
-    # ****************************************************************
 
 
-def EnableRTMP():
+# ****************************************************************
+def enable_rtmp():
     try:
         addon_able.set_enabled("inputstream.adaptive")
     except Exception as e:
@@ -469,48 +470,39 @@ def EnableRTMP():
     except Exception as e:
         kodi.log(str(e))
     time.sleep(0.5)
-    xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
     dialog.ok("Operation Complete!", "Live Streaming has been Enabled!",
               "    Brought To You By %s " % siteTitle)
 
 
 # ****************************************************************
-def HUBINSTALL(name, url, script):
-    a_list = []
-    script_url = url
-    link = kodi.open_url(script_url)
-    matcher = script + '-(.+?).zip'
-    match = re.compile(matcher).findall(link)
-    for version in match:
-        a_list.append(version)
-    a_list.sort(cmp=ver_cmp, reverse=True)
-    newest_v = script + '-' + a_list[0]
-    newest_v_url = script_url + script + '-' + a_list[0] + '.zip'
+def get_url(script, source_url, source):
+    match = re.findall(script + '(-.+?)?.zip', source)
+    match.sort(reverse=True)
+    version = match[0] if match else ''
+    newest_v_url = source_url + script + version + '.zip'
+    return version, newest_v_url
+
+
+# ****************************************************************
+def hub_install(script, script_url, silent=False, dp=None):
+    version, newest_v_url = get_url(script, script_url, kodi.open_url(script_url))
     kodi.log("Looking for : " + newest_v_url)
-    path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
-    dp = xbmcgui.DialogProgress()
-    dp.create("Starting up", "Initializing ", '', 'Please Stand By....')
-    # lib = os.path.join(path, name + '.zip')
-    lib = os.path.join(path, newest_v + '.zip')
-    addonfolder = xbmc.translatePath(os.path.join('special://', 'home', 'addons'))
-    if os.path.exists(lib):
-        os.remove(lib)
+    if not silent:
+        dp = xbmcgui.DialogProgress()
+        dp.create("Starting up", "Initializing ", '', 'Please Stand By....')
+    lib = os.path.join(packages_path, script + version + '.zip')
+    os.remove(lib) if os.path.exists(lib) else ''
     downloader.download(newest_v_url, lib, dp, timeout=120)
     try:
-        # xbmc.executebuiltin("InstallAddon(%s)" % newest_v)
-        extract.all(lib, addonfolder, '')
+        extract.extract_all(lib, addon_folder, None)
         time.sleep(2)
     except IOError as e:
         kodi.message("Failed to open required files", "Error is: ", str(e))
         return False
-    # except IOError, (errno, strerror):
-    #     kodi.message("Failed to open required files", "Error code is:", strerror)
-    #     return False
+
 
 # ****************************************************************
-
-
-def OPENSUBINSTALL(url):
+def open_sub_install(url):
     path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
     dp = xbmcgui.DialogProgress()
     dp.create("Please Wait", " ", '', 'Installing Official OpenSubtitles Addon')
@@ -525,7 +517,7 @@ def OPENSUBINSTALL(url):
     addonfolder = xbmc.translatePath(os.path.join('special://', 'home', 'addons'))
     time.sleep(2)
     try:
-        extract.all(lib, addonfolder, '')
+        extract.extract_all(lib, addonfolder, '')
     except IOError as e:
         kodi.message("Failed to open required files", "Error is: ", str(e))
         return False
@@ -533,9 +525,7 @@ def OPENSUBINSTALL(url):
     #     kodi.message("Failed to open required files", "Error code is:", strerror)
     #     return False
     #
-    xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
     addon_able.set_enabled("service.subtitles.opensubtitles_by_opensubtitles")
-    xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
     dialog.ok("Installation Complete!", "    We hope you enjoy your Kodi addon experience!",
               "    Brought To You By %s " % siteTitle)
 
@@ -549,7 +539,7 @@ def set_content(content):
 
 
 # HELPDIR**************************************************************
-def addDir(name, url, mode, thumb):
+def add_dir(name, url, mode, thumb):
     u = sys.argv[0] + "?url=" + quote_plus(url) + "&mode=" + str(mode) + "&name=" + quote_plus(name)
     # ok = True
     liz = xbmcgui.ListItem(name, iconImage=iconart, thumbnailImage=thumb)
@@ -562,19 +552,19 @@ def addDir(name, url, mode, thumb):
     return ok
 
 
-def addHELPDir(name, url, mode, iconimage, fanart, description, filetype, repourl, version, author, contextmenuitems=[],
-               contextreplace=False):
+def add_help_dir(name, url, mode, iconimage, art, description, filetype, repourl, version, author,
+                 contextmenuitems=None, contextreplace=False):
     u = sys.argv[0] + "?url=" + quote_plus(url) + "&mode=" + str(mode) + "&name=" + quote_plus(
         name) + "&iconimage=" + quote_plus(iconimage) + "&fanart=" + quote_plus(
-        fanart) + "&description=" + quote_plus(description) + "&filetype=" + quote_plus(
+        art) + "&description=" + quote_plus(description) + "&filetype=" + quote_plus(
         filetype) + "&repourl=" + quote_plus(repourl) + "&author=" + quote_plus(
         author) + "&version=" + quote_plus(version)
-    # ok = True
+    contextmenuitems = [] if not contextmenuitems else contextmenuitems
     liz = xbmcgui.ListItem(name, iconImage=iconart, thumbnailImage=iconimage)  # "DefaultFolder.png"
     # if len(contextmenuitems) > 0:
     liz.addContextMenuItems(contextmenuitems, replaceItems=contextreplace)
     liz.setInfo(type="Video", infoLabels={"title": name, "plot": description})
-    liz.setProperty("fanart_image", fanart)
+    liz.setProperty("fanart_image", art)
     liz.setProperty("Addon.Description", description)
     liz.setProperty("Addon.Creator", author)
     liz.setProperty("Addon.Version", version)
@@ -583,16 +573,15 @@ def addHELPDir(name, url, mode, iconimage, fanart, description, filetype, repour
     return ok
 
 
-def add2HELPDir(name, url, mode, iconimage, fanart, description, filetype, contextmenuitems=[], contextreplace=False):
+def add_2help_dir(name, url, mode, iconimage, art, description, filetype, contextmenuitems=None, contextreplace=False):
     u = sys.argv[0] + "?url=" + quote_plus(url) + "&mode=" + str(mode) + "&name=" + quote_plus(
         name) + "&iconimage=" + quote_plus(iconimage) + "&fanart=" + quote_plus(
-        fanart) + "&description=" + quote_plus(description) + "&filetype=" + quote_plus(filetype)
-    # ok = True
+        art) + "&description=" + quote_plus(description) + "&filetype=" + quote_plus(filetype)
     liz = xbmcgui.ListItem(name, iconImage=iconart, thumbnailImage=iconimage)
-    # if len(contextmenuitems) > 0:
+    contextmenuitems = [] if not contextmenuitems else contextmenuitems
     liz.addContextMenuItems(contextmenuitems, replaceItems=contextreplace)
     liz.setInfo(type="Video", infoLabels={"title": name, "Plot": description})
-    liz.setProperty("fanart_image", fanart)
+    liz.setProperty("fanart_image", art)
     ok = xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True)
     return ok
 
@@ -602,16 +591,16 @@ def keymaps():
     try:
         link = kodi.open_url(Keymaps_URL).replace('\n', '').replace('\r', '')
     except IOError:
-        kodi.addDir("No Keymaps Available", '', '', artwork + 'unkeymap.png')
+        kodi.add_dir("No Keymaps Available", '', '', artwork + 'unkeymap.png')
         kodi.log('Could not open keymaps URL')
         return
     match = re.compile('name="(.+?)".+?rl="(.+?)".+?mg="(.+?)".+?anart="(.+?)".+?ersion="(.+?)".+?ash="(.+?)"').findall(
         link)
     if os.path.isfile(KEYBOARD_FILE):
-        kodi.addDir("Remove Current Keymap Configuration", '', 'uninstall_keymap', artwork + 'unkeymap.png')
-    for name, url, iconimage, fanart, version, description in match:
+        kodi.add_dir("Remove Current Keymap Configuration", '', 'uninstall_keymap', artwork + 'unkeymap.png')
+    for name, url, iconimage, art, version, description in match:
         name = "[COLOR white][B]" + name + "[/B][/COLOR]"
-        kodi.addDir(name, url, 'install_keymap', artwork + 'keymapadd.png')
+        kodi.add_dir(name, url, 'install_keymap', artwork + 'keymapadd.png')
     viewsetter.set_view("files")
 
 
@@ -644,7 +633,7 @@ def install_keymap(name, url):
     time.sleep(2)
     dp.update(0, "", "Installing Please wait..", "")
     try:
-        extract.all(lib, addonfolder, dp)
+        extract.extract_all(lib, addonfolder, dp)
     except IOError as e:
         kodi.message("Failed to open required files", "Error is: ", str(e))
         return False
@@ -766,70 +755,43 @@ def make_lib(path, name, url=None):
               "[/COLOR]")
 
 
-##############
-def ver_cmp(x, y):
-    for i, j in izip_longest(*[x.split('.'), y.split('.')], fillvalue=0):
-        if int(i) < int(j):
-            return -1
-        elif int(i) > int(j):
-            return 1
-    return 0
-
-
 # New Dependency Routine #####################
-def NEW_Depend(dataurl, script):
+def new_depend(dataurl, script):
     kodi.log("SCRIPT LOOKED FOR IS : " + script)
     if "github" in dataurl:
         kodi.log("Is Github Repo")
-        GITHUBGET(script, dataurl)
+        get_github(script, dataurl)
     else:
         kodi.log("Is Private Repo")
         try:
-            a_list = []
             link = kodi.open_url(tvpath)
             if script in link:
                 script_url = tvpath + script + '/'
-                link = kodi.open_url(script_url)
-                matcher = script + '-(.+?).zip'
-                match = re.compile(matcher).findall(link)
-                for version in match:
-                    a_list.append(version)
-                a_list.sort(cmp=ver_cmp, reverse=True)
-                orglist = script_url + script + '-' + a_list[0] + '.zip'
-                kodi.log(' DOWNLOADING TVA FILE to ' + script + '.zip')
-                DEPENDINSTALL(script, orglist)
+                version, orglist = get_url(script, script_url, link)
+                kodi.log(' DOWNLOADING TVA FILE to ' + script + version + '.zip')
+                depend_install(script, orglist)
             else:
                 link = kodi.open_url(kodi_url)
                 if script in link:
                     script_url = kodi_url + script + '/'
-                    link = kodi.open_url(script_url)
-                    matcher = script + '-(.+?).zip'
-                    match = re.compile(matcher).findall(link)
-                    for version in match:
-                        a_list.append(version)
-                    a_list.sort(cmp=ver_cmp, reverse=True)
-                    orglist = script_url + script + '-' + a_list[0] + '.zip'
-                    kodi.log(' DOWNLOADING ORG FILE to ' + script + '.zip')
-                    DEPENDINSTALL(script, orglist)
+                    version, orglist = get_url(script, script_url, link)
+                    kodi.log(' DOWNLOADING Kodi FILE to ' + script + version + '.zip')
+                    depend_install(script, orglist)
                 else:
-                    orglist = dataurl + script + '/' + script + '-'
+                    orglist = dataurl + script + '/' + script
                     try:
                         script_urls = dataurl + script + '/'
                         link = kodi.open_url(script_urls)
                         if not link:
-                            script_url = script_urls.replace("raw.", "").replace("/master/", "/tree/master/")
-                            link = kodi.open_url(script_url)
-                        if "Invalid request" in link:
-                            kodi.log("DEAD REPO LOCATION = " + dataurl)
+                            script_urls = script_urls.replace("raw.", "").replace("/master/", "/tree/master/")
+                            link = kodi.open_url(script_urls)
+                        if link and "Invalid request" not in link:
+                            version, orglist = get_url(script, script_urls, link)
+                            orglist += version + '.zip'
+                            kodi.log(' DOWNLOADING NATIVE to ' + script + version + '.zip')
+                            depend_install(script, orglist)
                         else:
-                            matcher = script + '-(.+?).zip'
-                            match = re.compile(matcher).findall(link)
-                            for version in match:
-                                a_list.append(version)
-                            a_list.sort(cmp=ver_cmp, reverse=True)
-                            orglist += a_list[0] + '.zip'
-                            kodi.log(' DOWNLOADING NATIVE to ' + script + '.zip')
-                            DEPENDINSTALL(script, orglist)
+                            kodi.log("DEAD REPO LOCATION = " + dataurl)
                     except Exception as e:
                         kodi.log(str(e))
                         kodi.log("No local depend found = " + script + " Unfound URL is " + orglist)
@@ -839,73 +801,46 @@ def NEW_Depend(dataurl, script):
             traceback.print_exc(file=sys.stdout)
 
 
-def GITHUBGET(script, dataurl):
+def get_github(script, dataurl):
     try:
-        fix_urls = dataurl + script + '/'
-        fixed_url = fix_urls.replace("raw/", "").replace("/master/", "/blob/master/")\
-            .replace("githubusercontent", "github")
-        a_list = []
         link = kodi.open_url(tvpath)
         if script in link:
             script_url = tvpath + script + '/'
-            link = kodi.open_url(script_url)
-            matcher = script + '-(.+?).zip'
-            match = re.compile(matcher).findall(link)
-            for version in match:
-                a_list.append(version)
-            a_list.sort(cmp=ver_cmp, reverse=True)
-            orglist = script_url + script + '-' + a_list[0] + '.zip'
-            kodi.log(' DOWNLOADING TVA FILE to ' + script + '.zip')
-            DEPENDINSTALL(script, orglist)
+            version, orglist = get_url(script, script_url, link)
+            kodi.log(' DOWNLOADING TVA FILE to ' + script + version + '.zip')
+            depend_install(script, orglist)
         else:
             link = kodi.open_url(kodi_url)
             if script in link:
                 script_url = kodi_url + script + '/'
-                link = kodi.open_url(script_url)
-                matcher = script + '-(.+?).zip'
-                match = re.compile(matcher).findall(link)
-                for version in match:
-                    a_list.append(version)
-                a_list.sort(cmp=ver_cmp, reverse=True)
-                orglist = script_url + script + '-' + a_list[0] + '.zip'
-                kodi.log(' DOWNLOADING ORG FILE to ' + script + '.zip')
-                # kodi.log('From: '+orglist)
-                DEPENDINSTALL(script, orglist)
+                version, orglist = get_url(script, script_url, link)
+                kodi.log(' DOWNLOADING KODI FILE to ' + script + version + '.zip')
+                depend_install(script, orglist)
             else:
-                try:
+                fix_urls = dataurl + script + '/'
+                fixed_url = fix_urls.replace("raw/", "").replace("/master/", "/blob/master/") \
+                    .replace("githubusercontent", "github")
+                link = kodi.open_url(fixed_url)
+                if link and "Invalid request" not in link:
+                    version, orglist = get_url(script, fixed_url, link)
+                    kodi.log(' DOWNLOADING NATIVE to ' + script + version + '.zip')
+                    depend_install(script, orglist)
+                else:
+                    fixed_url = fix_urls.replace("raw/", "").replace("/master/", "/tree/master/") \
+                        .replace("githubusercontent", "github")
                     link = kodi.open_url(fixed_url)
-                    if link:
-                        matcher = script + '-(.+?).zip'
-                        match = re.compile(matcher).findall(link)
-                        for version in match:
-                            a_list.append(version)
-                        # a_list.sort(cmp=ver_cmp, reverse=True)
-                        a_list.sort(reverse=True)
-                        orglist = dataurl + script + '/' + script + '-' + a_list[0] + '.zip'
-                        # kodi.log(' DOWNLOADING to ' + script + '.zip')
-                        DEPENDINSTALL(script, orglist)
-                        kodi.log("TRYING NATIVE LOCATION")
-                    if "Invalid request" in link:
-                        kodi.log("DEAD REPO LOCATION = " + dataurl)
+                    if link and "Invalid request" not in link:
+                        version, orglist = get_url(script, fixed_url, link)
+                        kodi.log(' DOWNLOADING NATIVE to ' + script + version + '.zip')
+                        depend_install(script, orglist)
                     else:
-                        matcher = script + '-(.+?).zip'
-                        match = re.compile(matcher).findall(link)
-                        for version in match:
-                            a_list.append(version)
-                        # a_list.sort(cmp=ver_cmp, reverse=True)
-                        a_list.sort(reverse=True)
-                        orglist = dataurl + script + '/' + script + '-' + a_list[0] + '.zip'
-                        kodi.log(' DOWNLOADING NATIVE to ' + script + '.zip')
-                        DEPENDINSTALL(script, orglist)
-                except Exception as e:
-                    kodi.log("Could not find required files " + str(e))
-                    traceback.print_exc(file=sys.stdout)
+                        kodi.log("DEAD REPO LOCATION = " + dataurl)
     except Exception as e:
         kodi.log("Failed to find required files " + str(e))
         traceback.print_exc(file=sys.stdout)
 
 
-def DEPENDINSTALL(name, url):
+def depend_install(name, url):
     path = xbmc.translatePath(os.path.join('special://home', 'addons', 'packages'))
     lib = os.path.join(path, name + '.zip')
     addonfolder = xbmc.translatePath(os.path.join('special://', 'home', 'addons'))
@@ -915,11 +850,10 @@ def DEPENDINSTALL(name, url):
         pass
     download(url, lib, addonfolder, name)
     addon_able.set_enabled(name)
-    xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
 #################################################################
 
 
-def ADDONINSTALL(name, url, description, filetype, repourl, Auto=False, v='', vO=''):
+def addon_install(name, url, repourl):
     try:
         name = name.split('[COLOR FF0077D7]Install [/COLOR][COLOR FFFFFFFF]')[1].split('[/COLOR][COLOR FF0077D7] (v')[0]
     except Exception as e:
@@ -929,7 +863,7 @@ def ADDONINSTALL(name, url, description, filetype, repourl, Auto=False, v='', vO
     addonname = '-'.join(url.split('/')[-1].split('-')[:-1])
     addonname = str(addonname).replace('[', '').replace(']', '').replace('"', '').replace('[', '').replace("'", '')
     try:
-        addonname = re.search('(.+?)($|-\d+\.)', addonname).group(1)
+        addonname = re.search('(.+?)($|-)', addonname).group(1)
     except Exception as e:
         kodi.log(str(e))
         traceback.print_exc(file=sys.stdout)
@@ -963,8 +897,8 @@ def ADDONINSTALL(name, url, description, filetype, repourl, Auto=False, v='', vO
                     if 'xbmc.gui' not in requires:
                         dependspath = xbmc.translatePath(os.path.join('special://home/addons', requires))
                         if not os.path.exists(dependspath):
-                            NEW_Depend(dataurl, requires)
-                            Deep_Depends(dataurl, requires)
+                            new_depend(dataurl, requires)
+                            deep_depends(dataurl, requires)
         except Exception as e:
             kodi.log(str(e))
             traceback.print_exc(file=sys.stdout)
@@ -990,8 +924,6 @@ def ADDONINSTALL(name, url, description, filetype, repourl, Auto=False, v='', vO
                 kodi.log("REPO TO ENABLE IS  " + repo_name)
                 addon_able.set_enabled(repo_name)
 
-        xbmc.executebuiltin("XBMC.UpdateLocalAddons()")
-        xbmc.executebuiltin("XBMC.UpdateAddonRepos()")
         if not dialog.yesno(siteTitle, '                     Click Continue to install more addons or',
                             '                    Restart button to finalize addon installation',
                             "                          Brought To You By %s " % siteTitle,
@@ -1001,7 +933,7 @@ def ADDONINSTALL(name, url, description, filetype, repourl, Auto=False, v='', vO
         return
 
 
-def Deep_Depends(dataurl, addonname):
+def deep_depends(dataurl, addonname):
     depends = xbmc.translatePath(os.path.join('special://home', 'addons', addonname, 'addon.xml'))
     source = open(depends, mode='r')
     link = source.read()
@@ -1011,7 +943,7 @@ def Deep_Depends(dataurl, addonname):
         if 'xbmc.python' not in requires:
             dependspath = xbmc.translatePath(os.path.join('special://home/addons', requires))
             if not os.path.exists(dependspath):
-                NEW_Depend(dataurl, requires)
+                new_depend(dataurl, requires)
 
 
 def install_from_url():
@@ -1021,7 +953,7 @@ def install_from_url():
                                 hidden=False)
     if zip_url:
         name = os.path.basename(zip_url)
-        ADDONINSTALL(name, zip_url, '', '', '', True, '', '')
+        addon_install(name, zip_url, '')
 
 # ****************************************************************
 
@@ -1032,16 +964,12 @@ def download(url, dest, addonfolder, name):
     dp = xbmcgui.DialogProgress()
     dp.create("Downloading: " + name)
     dp.update(0, "Downloading: " + name, '', 'Please Wait')
-    try:
-        urllib.urlretrieve(url, dest, lambda nb, bs, fs: _pbhook(nb, bs, fs, '', dp))
-    except:
-        urllib.request.urlretrieve(url, dest, lambda nb, bs, fs: _pbhook(nb, bs, fs, '', dp))
+    urlretrieve(url, dest, lambda nb, bs, fs: _pbhook(nb, bs, fs, dp))
     kodi.log("DOWNLOAD IS DONE  " + name)
-    extract.all(dest, addonfolder, dp=None)
+    extract.extract_all(dest, addonfolder, dp=None)
 
 
-
-def _pbhook(numblocks, blocksize, filesize, url, dp):
+def _pbhook(numblocks, blocksize, filesize, dp):
     try:
         percent = min((numblocks * blocksize * 100) / filesize, 100)
     except Exception as e:
@@ -1051,11 +979,6 @@ def _pbhook(numblocks, blocksize, filesize, url, dp):
     if dp.iscanceled():
         dp.close()
         raise Exception("Canceled")
-        
-        # def chunks(data, SIZE=10000):
-        #     it = iter(data)
-        #     for i in xrange(0, len(data), SIZE):
-        #         yield {k:data[k] for k in islice(it, SIZE)}
 
 
 def get_max_version(repo_name, repourl, tree_url):

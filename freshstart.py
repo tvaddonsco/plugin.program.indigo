@@ -10,7 +10,7 @@ AddonTitle = kodi.addon.getAddonInfo('name')
 
 
 def startup_freshstart():
-    if kodi.yesnoDialog("Please confirm that you wish to factory restore your configuration.",
+    if kodi.yesno_dialog("Please confirm that you wish to factory restore your configuration.",
                         "                This will result in the loss of all your current data!",
                         ' ', AddonTitle, nolabel='No', yeslabel='Yes'):
         home_path = xbmc.translatePath(os.path.join('special://home'))
@@ -33,7 +33,7 @@ def startup_freshstart():
         #  Directories and sub directories Directories to ignore and leave intact
         sub_dir_exclude = ['metadata.album.universal', 'metadata.artists.universal', 'service.xbmc.versioncheck',
                            'metadata.common.musicbrainz.org', 'metadata.common.imdb.com']
-        if kodi.yesnoDialog(AddonTitle, "Do you wish to keep %s installed for convenience after the factory restore?"
+        if kodi.yesno_dialog(AddonTitle, "Do you wish to keep %s installed for convenience after the factory restore?"
                             % AddonTitle, '', nolabel='No', yeslabel='Yes'):
             sub_dir_exclude.extend([AddonID])
         # Files to ignore and not to be removed
