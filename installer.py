@@ -26,10 +26,10 @@ try:
 except ImportError:
     from itertools import zip_longest as izip_longest
 
-    try:
-        from urllib import urlretrieve as urlretrieve
-    except ImportError:
-        from urllib.request import urlretrieve as urlretrieve
+try:
+    from urllib import urlretrieve as urlretrieve
+except ImportError:
+    from urllib.request import urlretrieve as urlretrieve
 
 try:
     quote_plus = urllib.quote_plus
